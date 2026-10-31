@@ -1,0 +1,51 @@
+[
+  {
+    "application": "PAY",
+    "depends_on": "CBS",
+    "dependency_type": "API",
+    "is_critical": true,
+    "description": "Posts debits/credits to the core ledger"
+  },
+  {
+    "application": "CUS",
+    "depends_on": "PAY",
+    "dependency_type": "API",
+    "is_critical": true,
+    "description": "Reads payment / transaction status"
+  },
+  {
+    "application": "CUS",
+    "depends_on": "CBS",
+    "dependency_type": "API",
+    "is_critical": true,
+    "description": "Reads balances and account details"
+  },
+  {
+    "application": "REC",
+    "depends_on": "PAY",
+    "dependency_type": "BATCH_FEED",
+    "is_critical": true,
+    "description": "Nightly + intraday payment transaction extract"
+  },
+  {
+    "application": "REC",
+    "depends_on": "CBS",
+    "dependency_type": "BATCH_FEED",
+    "is_critical": true,
+    "description": "Ledger posting extract"
+  },
+  {
+    "application": "RDW",
+    "depends_on": "REC",
+    "dependency_type": "BATCH_FEED",
+    "is_critical": false,
+    "description": "Reconciled transaction data"
+  },
+  {
+    "application": "RDW",
+    "depends_on": "CBS",
+    "dependency_type": "BATCH_FEED",
+    "is_critical": false,
+    "description": "Daily account and balance snapshot"
+  }
+]

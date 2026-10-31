@@ -1,0 +1,6 @@
+{
+  "name": "BankOps AI synthetic banking environment",
+  "data_source": "SYNTHETIC",
+  "description": "Fictional banking IT environment: 5 applications, dependencies, change records, 10 incidents and operational evidence for the main scenario (Payment Processing failure after release 2.4.1). Times are relative to load time. No real customer or bank data.",
+  "license": "Project-internal synthetic data"
+}

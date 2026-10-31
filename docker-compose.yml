@@ -1,0 +1,60 @@
+name: bankops-ai
+
+services:
+  db:
+    # PostgreSQL 17 with the pgvector extension available for the later RAG phase
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bankops}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-bankops}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5445}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bankops} -d ${POSTGRES_DB:-bankops}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-bankops}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-bankops}
+      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:5173"]}
+      AUTH_ENABLED: ${AUTH_ENABLED:-false}
+      API_KEYS: ${API_KEYS:-{}}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-claude-opus-5-5}
+      AI_EFFORT: ${AI_EFFORT:-high}
+      AI_PROVIDER: ${AI_PROVIDER:-anthropic}
+      # Ollama runs on the Windows host, not in a container ("localhost" inside the container is the container)
+      OLLAMA_BASE_URL: ${OLLAMA_DOCKER_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:8b}
+      OLLAMA_NUM_CTX: ${OLLAMA_NUM_CTX:-16384}
+      OLLAMA_THINK: ${OLLAMA_THINK:-false}
+      OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-900}
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8000:8000"
+
+  # Reserved for background processing in a later phase: docker compose --profile future up
+  redis:
+    image: redis:7-alpine
+    profiles: ["future"]
+    ports:
+      - "6379:6379"
+
+volumes:
+  pgdata:

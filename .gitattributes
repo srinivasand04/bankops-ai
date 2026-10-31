@@ -1,0 +1,6 @@
+# Store text with LF line endings so scripts work inside Linux containers
+* text=auto eol=lf
+*.sh text eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
