@@ -62,9 +62,14 @@ python -m app.ingestion sources
 python -m app.ingestion reset --yes      # development only: wipes every table
 ```
 
-## Synthetic evidence for the main scenario
+## Synthetic evidence (149 events, one scenario per application)
 
-83 events built around the main scenario: payment-api 5xx rate, p95 latency, DB pool usage and
-throughput every 10 minutes. There are also deployment and connection-pool logs, alerts and health checks, a failed
-reconciliation job, Customer Services timeouts, and *healthy* Core Banking metrics, so an investigation can
-rule Core Banking out as the cause.
+| Incident | Application | Cause in the evidence | Also included so the AI can rule things out |
+|---|---|---|---|
+| INC-1007 (P1) / INC-1008 / INC-1009 | PAY, then REC and CUS downstream | release 2.4.1 cut the DB pool from 100 to 20; fraud-scoring call holds connections | healthy Core Banking CPU and ledger latency |
+| INC-1003 (P2) | CBS | CHG-2030 lowered the Oracle listener process limit (300 -> 150); ORA-12519 errors after failover | flat DB CPU; payment retries as the downstream symptom |
+| INC-1004 (P2) | CUS | identity-provider key rotation; the SSO library from CHG-2035 caches keys for 24 h, so new tokens fail | healthy Payment and Core Banking metrics |
+| INC-1006 (P3) | RDW | ETL_AGG_DAILY overlaps the liquidity report window; warehouse CPU at 95% | Core Banking healthy, reconciliation feed delivered on time; INC-1005 is the same pattern |
+
+Each scenario has metrics, logs, alerts or job runs in the incident's time window, plus at least one
+nearby change that is not the cause (for example CHG-2038 OS patching).

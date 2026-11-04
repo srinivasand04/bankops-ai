@@ -16,58 +16,76 @@ from app.models.enums import ActionType, AgentExecutionStatus, IncidentCategory,
 
 
 class CitedFact(BaseModel):
-    statement: str = Field(description="A fact directly supported by the context data")
-    evidence_ids: list[str] = Field(description="IDs of the context items that prove the statement")
+    statement: str = Field(description="One fact the data directly shows (timing, values, messages) - not an interpretation")
+    evidence_ids: list[str] = Field(description="ids of the fact-base items that prove the statement")
 
 
 class RootCauseHypothesis(BaseModel):
-    description: str
-    category: IncidentCategory
+    description: str = Field(description="The candidate cause and the mechanism, in one or two sentences")
+    category: IncidentCategory = Field(
+        description="Where the fault lies: APPLICATION for code or configuration shipped in a release, "
+        "INFRASTRUCTURE for servers, storage or platform, DATABASE for the database itself"
+    )
     confidence: float = Field(description="0.0 - 1.0, how strongly the evidence supports this hypothesis")
-    supporting_evidence_ids: list[str]
-    contradicting_evidence_ids: list[str]
+    supporting_evidence_ids: list[str] = Field(description="ids of items that support it")
+    contradicting_evidence_ids: list[str] = Field(description="ids of items that argue against it")
     missing_evidence: list[str] = Field(description="Evidence that would confirm or refute the hypothesis")
     verification_steps: list[str] = Field(description="How a human engineer can verify it")
 
 
 class AffectedService(BaseModel):
-    application_code: str
-    impact: str
-    evidence_ids: list[str]
+    application_code: str = Field(description="Application code from the fact base, e.g. PAY")
+    impact: str = Field(description="One sentence on how this service is affected, with the observed symptom")
+    evidence_ids: list[str] = Field(description="ids of items that show the impact")
 
 
 class BusinessImpactAssessment(BaseModel):
-    summary: str
-    customer_impact: str
-    regulatory_or_financial_exposure: str
-    assessed_severity: Severity
-    severity_rationale: str
+    summary: str = Field(description="One or two sentences on the business impact (not a single word)")
+    customer_impact: str = Field(description="Who is affected and how")
+    regulatory_or_financial_exposure: str = Field(description="Financial, regulatory or reporting exposure")
+    assessed_severity: Severity = Field(description="Severity the evidence supports (may differ from recorded)")
+    severity_rationale: str = Field(description="Why that severity")
 
 
 class RecommendedAction(BaseModel):
     action_type: ActionType = Field(description="CORRECTIVE fixes this incident; PREVENTIVE stops recurrence")
-    description: str
-    owner_team: str
+    description: str = Field(description="A concrete action an engineer can carry out")
+    owner_team: str = Field(description="Team that should own the action")
     urgency: Literal["IMMEDIATE", "SHORT_TERM", "LONG_TERM"]
-    requires_human_approval: bool
-    approval_reason: str | None
+    requires_human_approval: bool = Field(description="true for anything that changes production")
+    approval_reason: str | None = Field(description="Why approval is needed, or null")
 
 
 class EscalationRecommendation(BaseModel):
     recommended: bool
-    reason: str
+    reason: str = Field(description="Why escalation is or is not recommended now")
 
 
 class IncidentAnalysis(BaseModel):
-    summary: str
-    confirmed_facts: list[CitedFact]
-    root_cause_hypotheses: list[RootCauseHypothesis]
-    affected_services: list[AffectedService]
+    summary: str = Field(
+        description="Two or three sentences that directly answer the incident team's request first "
+        "(for example 'Most likely yes - ...'), then state the most likely cause and the current impact"
+    )
+    confirmed_facts: list[CitedFact] = Field(description="Facts directly shown by the data, each with citations")
+    root_cause_hypotheses: list[RootCauseHypothesis] = Field(description="Candidate causes, most likely first")
+    affected_services: list[AffectedService] = Field(description="Impacted applications")
     business_impact: BusinessImpactAssessment
-    recommended_actions: list[RecommendedAction]
+    recommended_actions: list[RecommendedAction] = Field(description="Corrective and preventive actions")
     escalation: EscalationRecommendation
-    missing_information: list[str]
-    overall_confidence: Literal["LOW", "MEDIUM", "HIGH"]
+    missing_information: list[str] = Field(description="Data that is not in the fact base but would help")
+    overall_confidence: Literal["LOW", "MEDIUM", "HIGH"] = Field(description="Confidence in the analysis as a whole")
+
+
+def field_guide(model: type[BaseModel] = IncidentAnalysis, indent: str = "") -> str:
+    """Plain-text list of fields and descriptions - for models that only receive the schema as a grammar."""
+    lines = []
+    for name, info in model.model_fields.items():
+        # list[CitedFact] -> CitedFact; plain types pass through
+        nested = (getattr(info.annotation, "__args__", None) or (info.annotation,))[0]
+        lines.append(f"{indent}- {name}" + (f": {info.description}" if info.description else ""))
+        if isinstance(nested, type) and issubclass(nested, BaseModel):
+            lines.append(field_guide(nested, indent + "  "))
+    return "\n".join(lines)
 
 
 # ---- API ---------------------------------------------------------------------------------

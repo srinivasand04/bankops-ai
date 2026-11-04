@@ -43,8 +43,47 @@ ollama pull qwen3:8b                 # ~5 GB; qwen3:4b (~2.5 GB) is faster but w
 
 `.env`: `AI_PROVIDER=ollama`. The Docker backend reaches the Windows host at
 `OLLAMA_DOCKER_URL=http://host.docker.internal:11434`; a backend run on the host uses `OLLAMA_BASE_URL`.
-`OLLAMA_NUM_CTX=16384` is required: Ollama's default context window is smaller than the fact base,
-and an undersized window truncates the prompt silently. `OLLAMA_THINK=false` keeps CPU runs short.
+Ollama silently drops the start of a prompt that exceeds its context window, so the adapter sizes
+`num_ctx` from the prompt (never below `OLLAMA_NUM_CTX=8192`). `OLLAMA_THINK=false` keeps CPU runs
+short; `OLLAMA_KEEP_ALIVE=30m` keeps the model and its prompt-prefix cache loaded between runs.
+
+### Compact mode for local models (`OLLAMA_COMPACT=true`)
+
+Measured on the demo laptop (i5-1335U, 16 GB, no GPU): the JSON-schema constraint costs nothing
+(about 4.8 tokens/s with or without it); **prompt length** is what costs time. A 6.5K-token prompt
+was read at about 11 tokens/s and slowed generation to about 1.3 tokens/s, giving 26 minutes per analysis.
+Compact mode ([compact.py](../backend/app/ai/compact.py)) keeps the same structure and ids but:
+
+| Section | Full | Compact |
+|---|---|---|
+| Metric series | every 10-minute point | first, peak, min, latest, trend, attribute changes (e.g. `pool_max` 100 -> 20) |
+| Logs / alerts | every event | identical lines merged with `occurrences` |
+| Timeline | all events | human investigation history only (AI entries are already listed as root causes / actions) |
+| Changes, similar incidents, actions | full records | key fields, capped lists |
+
+Measured on INC-1007:
+
+| Run | Model | Prompt | Output | Time | Quality |
+|---|---|---|---|---|---|
+| Full fact base | `qwen3:8b` | 6,561 tokens (~10 min to read) | 1,249 tokens at 1.3 tok/s | 26 min | correct cause; summary repeated the question |
+| Compact + new prompt rules | `qwen3:8b` | 4,799 tokens (5.1 min) | 1,432 tokens at 2.0 tok/s | 17 min | correct cause; direct answer; APPLICATION category; full sentences |
+| Compact + new prompt rules | `qwen3:4b` (default) | 4,794 tokens | 1,521 tokens | 11.6 min | correct cause at 0.85; repeated an existing hypothesis it was shown |
+
+Generation is about 70% of the time, so the output length sets the floor on a CPU; Claude takes under a minute.
+
+Citable ids are recomputed from the compact data, so the guardrails reject any id the model did not
+see. Because a local model receives the output schema only as a decoding grammar, compact mode also
+appends a **field guide** (generated from the schema descriptions) and length limits to the system
+prompt. It is fixed text, so Ollama reuses it between runs. The report records `context_summary.mode`
+and the execution records `duration_seconds`.
+
+### Prompt rules added after the first local run
+
+- `summary` must answer the team's request in its first sentence ("Most likely yes - ..."), never
+  repeat the question.
+- Root-cause category is where the fault lies: code or configuration shipped in a release is
+  APPLICATION, not INFRASTRUCTURE.
+- Text fields are full sentences (the first local run returned "High" as a business-impact summary).
 
 ## Claude request
 
@@ -76,6 +115,7 @@ supporting / contradicting evidence, missing evidence, verification steps), `aff
 | A fact must cite evidence that exists | invalid IDs stripped; a fact with no valid citation moves to `unverified_statements` |
 | Hypotheses are never confirmed | every AI hypothesis is stored with `status: HYPOTHESIS`; confirmation remains the human `/api/root-causes/{id}/review` |
 | Confidence is 0-1 | clamped, and the change is noted |
+| No repeated hypotheses | duplicates (same wording) are removed, keeping the higher confidence |
 | No invented systems | affected services must be applications in the fact base |
 | Production changes need approval | rollback / deploy / restart / config / reprocess / close etc. are forced to `requires_human_approval: true` |
 | Unusable answers fail clearly | refusal or truncation -> 502; no credentials, rate limit or network -> 503; the attempt is saved as FAILED |

@@ -3,6 +3,363 @@
     "application": "CBS",
     "event_type": "METRIC",
     "level": "INFO",
+    "source_system": "db-monitor",
+    "message": "db_connection_errors_per_min=0",
+    "metric_name": "db_connection_errors_per_min",
+    "metric_value": 0,
+    "unit": "count",
+    "occurred_at": {
+      "minutes_ago": 8780
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "db-monitor",
+    "message": "db_cpu_pct=37",
+    "metric_name": "db_cpu_pct",
+    "metric_value": 37,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 8780
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "LOG",
+    "level": "INFO",
+    "source_system": "change-automation",
+    "message": "listener.ora updated by CHG-2030: PROCESSES=150 (previous 300); failover settings applied",
+    "occurred_at": {
+      "minutes_ago": 8729
+    },
+    "attributes": {
+      "change": "CHG-2030",
+      "previous_processes": 300,
+      "new_processes": 150
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "db-monitor",
+    "message": "db_connection_errors_per_min=0",
+    "metric_name": "db_connection_errors_per_min",
+    "metric_value": 0,
+    "unit": "count",
+    "occurred_at": {
+      "minutes_ago": 8720
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "LOG",
+    "level": "INFO",
+    "source_system": "db-cluster",
+    "message": "Oracle RAC node 1 failover to node 2 completed; sessions reconnecting",
+    "occurred_at": {
+      "minutes_ago": 8668
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "db-monitor",
+    "message": "db_connection_errors_per_min=24",
+    "metric_name": "db_connection_errors_per_min",
+    "metric_value": 24,
+    "unit": "count",
+    "occurred_at": {
+      "minutes_ago": 8660
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "db-monitor",
+    "message": "db_cpu_pct=41",
+    "metric_name": "db_cpu_pct",
+    "metric_value": 41,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 8660
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "LOG",
+    "level": "ERROR",
+    "source_system": "app-log",
+    "message": "ORA-12519: TNS:no appropriate service handler found",
+    "occurred_at": {
+      "minutes_ago": 8659
+    },
+    "attributes": {
+      "count_last_5m": 120
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "ALERT",
+    "level": "CRITICAL",
+    "source_system": "db-monitor",
+    "message": "Listener refusing new connections: process limit 150 reached",
+    "occurred_at": {
+      "minutes_ago": 8655
+    },
+    "attributes": {
+      "limit": 150
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "LOG",
+    "level": "ERROR",
+    "source_system": "app-log",
+    "message": "ORA-12519: TNS:no appropriate service handler found",
+    "occurred_at": {
+      "minutes_ago": 8620
+    },
+    "attributes": {
+      "count_last_5m": 410
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "db-monitor",
+    "message": "db_connection_errors_per_min=82",
+    "metric_name": "db_connection_errors_per_min",
+    "metric_value": 82,
+    "unit": "count",
+    "occurred_at": {
+      "minutes_ago": 8600
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "LOG",
+    "level": "ERROR",
+    "source_system": "app-log",
+    "message": "ORA-12519: TNS:no appropriate service handler found",
+    "occurred_at": {
+      "minutes_ago": 8560
+    },
+    "attributes": {
+      "count_last_5m": 380
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "db-monitor",
+    "message": "db_connection_errors_per_min=77",
+    "metric_name": "db_connection_errors_per_min",
+    "metric_value": 77,
+    "unit": "count",
+    "occurred_at": {
+      "minutes_ago": 8540
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "db-monitor",
+    "message": "db_cpu_pct=40",
+    "metric_name": "db_cpu_pct",
+    "metric_value": 40,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 8540
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "LOG",
+    "level": "ERROR",
+    "source_system": "app-log",
+    "message": "ORA-12519: TNS:no appropriate service handler found",
+    "occurred_at": {
+      "minutes_ago": 8500
+    },
+    "attributes": {
+      "count_last_5m": 260
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "db-monitor",
+    "message": "db_connection_errors_per_min=40",
+    "metric_name": "db_connection_errors_per_min",
+    "metric_value": 40,
+    "unit": "count",
+    "occurred_at": {
+      "minutes_ago": 8480
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "LOG",
+    "level": "INFO",
+    "source_system": "change-automation",
+    "message": "listener.ora restored: PROCESSES=300; listener restarted on both nodes",
+    "occurred_at": {
+      "minutes_ago": 8462
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "db-monitor",
+    "message": "db_connection_errors_per_min=0",
+    "metric_name": "db_connection_errors_per_min",
+    "metric_value": 0,
+    "unit": "count",
+    "occurred_at": {
+      "minutes_ago": 8440
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "db-monitor",
+    "message": "db_cpu_pct=36",
+    "metric_name": "db_cpu_pct",
+    "metric_value": 36,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 8440
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "HEALTH_CHECK",
+    "level": "INFO",
+    "source_system": "health-monitor",
+    "message": "core-banking health OK",
+    "occurred_at": {
+      "minutes_ago": 8440
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
+    "message": "ledger_posting_latency_ms=46",
+    "metric_name": "ledger_posting_latency_ms",
+    "metric_value": 46,
+    "unit": "ms",
+    "occurred_at": {
+      "minutes_ago": 4440
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
+    "message": "ledger_posting_latency_ms=45",
+    "metric_name": "ledger_posting_latency_ms",
+    "metric_value": 45,
+    "unit": "ms",
+    "occurred_at": {
+      "minutes_ago": 4320
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
+    "message": "ledger_posting_latency_ms=47",
+    "metric_name": "ledger_posting_latency_ms",
+    "metric_value": 47,
+    "unit": "ms",
+    "occurred_at": {
+      "minutes_ago": 4200
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
+    "message": "ledger_posting_latency_ms=44",
+    "metric_name": "ledger_posting_latency_ms",
+    "metric_value": 44,
+    "unit": "ms",
+    "occurred_at": {
+      "minutes_ago": 4000
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "db-monitor",
+    "message": "db_cpu_pct=39",
+    "metric_name": "db_cpu_pct",
+    "metric_value": 39,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 1620
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "db-monitor",
+    "message": "db_cpu_pct=40",
+    "metric_name": "db_cpu_pct",
+    "metric_value": 40,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 1500
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "db-monitor",
+    "message": "db_cpu_pct=38",
+    "metric_name": "db_cpu_pct",
+    "metric_value": 38,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 1380
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "db-monitor",
+    "message": "db_cpu_pct=41",
+    "metric_name": "db_cpu_pct",
+    "metric_value": 41,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 1200
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
     "source_system": "APM",
     "message": "db_cpu_pct=41%",
     "metric_name": "db_cpu_pct",
@@ -154,6 +511,214 @@
     "event_type": "METRIC",
     "level": "INFO",
     "source_system": "APM",
+    "message": "login_failure_rate_pct=0.9",
+    "metric_name": "login_failure_rate_pct",
+    "metric_value": 0.9,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 4440
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "LOG",
+    "level": "INFO",
+    "source_system": "release-pipeline",
+    "message": "Deployment of customer-services 5.2.0 completed (CHG-2035); SSO library upgraded to 3.0",
+    "occurred_at": {
+      "minutes_ago": 4438
+    },
+    "attributes": {
+      "change": "CHG-2035",
+      "version": "5.2.0",
+      "sso_library": "3.0"
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
+    "message": "login_failure_rate_pct=1.1",
+    "metric_name": "login_failure_rate_pct",
+    "metric_value": 1.1,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 4380
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "LOG",
+    "level": "INFO",
+    "source_system": "identity-provider",
+    "message": "Scheduled signing-key rotation: new key id kid-2026-10 published",
+    "occurred_at": {
+      "minutes_ago": 4325
+    },
+    "attributes": {
+      "new_kid": "kid-2026-10",
+      "previous_kid": "kid-2026-07"
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "APM",
+    "message": "login_failure_rate_pct=8.5",
+    "metric_name": "login_failure_rate_pct",
+    "metric_value": 8.5,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 4320
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "LOG",
+    "level": "ERROR",
+    "source_system": "app-log",
+    "message": "JWT signature validation failed: key id 'kid-2026-10' not found in cached JWKS (cache TTL 24h)",
+    "occurred_at": {
+      "minutes_ago": 4318
+    },
+    "attributes": {
+      "count_last_5m": 640
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "ALERT",
+    "level": "CRITICAL",
+    "source_system": "APM",
+    "message": "Login failure rate above 10% on POST /auth/token",
+    "occurred_at": {
+      "minutes_ago": 4310
+    },
+    "attributes": {
+      "threshold_pct": 10
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "METRIC",
+    "level": "CRITICAL",
+    "source_system": "APM",
+    "message": "login_failure_rate_pct=29.0",
+    "metric_name": "login_failure_rate_pct",
+    "metric_value": 29.0,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 4260
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "LOG",
+    "level": "ERROR",
+    "source_system": "app-log",
+    "message": "JWT signature validation failed: key id 'kid-2026-10' not found in cached JWKS (cache TTL 24h)",
+    "occurred_at": {
+      "minutes_ago": 4250
+    },
+    "attributes": {
+      "count_last_5m": 1810
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "METRIC",
+    "level": "CRITICAL",
+    "source_system": "APM",
+    "message": "login_failure_rate_pct=31.4",
+    "metric_name": "login_failure_rate_pct",
+    "metric_value": 31.4,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 4200
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "LOG",
+    "level": "ERROR",
+    "source_system": "app-log",
+    "message": "JWT signature validation failed: key id 'kid-2026-10' not found in cached JWKS (cache TTL 24h)",
+    "occurred_at": {
+      "minutes_ago": 4150
+    },
+    "attributes": {
+      "count_last_5m": 1975
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "METRIC",
+    "level": "CRITICAL",
+    "source_system": "APM",
+    "message": "login_failure_rate_pct=30.2",
+    "metric_name": "login_failure_rate_pct",
+    "metric_value": 30.2,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 4100
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "LOG",
+    "level": "ERROR",
+    "source_system": "app-log",
+    "message": "JWT signature validation failed: key id 'kid-2026-10' not found in cached JWKS (cache TTL 24h)",
+    "occurred_at": {
+      "minutes_ago": 4060
+    },
+    "attributes": {
+      "count_last_5m": 1720
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "LOG",
+    "level": "INFO",
+    "source_system": "app-log",
+    "message": "SSO config updated: jwks_refresh_on_unknown_kid=true; JWKS cache flushed",
+    "occurred_at": {
+      "minutes_ago": 4008
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
+    "message": "login_failure_rate_pct=1.3",
+    "metric_name": "login_failure_rate_pct",
+    "metric_value": 1.3,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 4000
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
+    "message": "login_failure_rate_pct=1.0",
+    "metric_name": "login_failure_rate_pct",
+    "metric_value": 1.0,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 3940
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
     "message": "payment_status_timeout_rate_pct=0.5%",
     "metric_name": "payment_status_timeout_rate_pct",
     "metric_value": 0.5,
@@ -219,6 +784,110 @@
     "unit": "%",
     "occurred_at": {
       "minutes_ago": 0
+    }
+  },
+  {
+    "application": "PAY",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
+    "message": "payment_retry_rate_pct=0.4",
+    "metric_name": "payment_retry_rate_pct",
+    "metric_value": 0.4,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 8780
+    }
+  },
+  {
+    "application": "PAY",
+    "event_type": "METRIC",
+    "level": "WARNING",
+    "source_system": "APM",
+    "message": "payment_retry_rate_pct=6.1",
+    "metric_name": "payment_retry_rate_pct",
+    "metric_value": 6.1,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 8660
+    }
+  },
+  {
+    "application": "PAY",
+    "event_type": "METRIC",
+    "level": "WARNING",
+    "source_system": "APM",
+    "message": "payment_retry_rate_pct=9.3",
+    "metric_name": "payment_retry_rate_pct",
+    "metric_value": 9.3,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 8540
+    }
+  },
+  {
+    "application": "PAY",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
+    "message": "payment_retry_rate_pct=0.5",
+    "metric_name": "payment_retry_rate_pct",
+    "metric_value": 0.5,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 8440
+    }
+  },
+  {
+    "application": "PAY",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
+    "message": "http_5xx_rate_pct=0.2",
+    "metric_name": "http_5xx_rate_pct",
+    "metric_value": 0.2,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 4440
+    }
+  },
+  {
+    "application": "PAY",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
+    "message": "http_5xx_rate_pct=0.2",
+    "metric_name": "http_5xx_rate_pct",
+    "metric_value": 0.2,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 4320
+    }
+  },
+  {
+    "application": "PAY",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
+    "message": "http_5xx_rate_pct=0.3",
+    "metric_name": "http_5xx_rate_pct",
+    "metric_value": 0.3,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 4200
+    }
+  },
+  {
+    "application": "PAY",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
+    "message": "http_5xx_rate_pct=0.2",
+    "metric_name": "http_5xx_rate_pct",
+    "metric_value": 0.2,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 4000
     }
   },
   {
@@ -1050,12 +1719,189 @@
   },
   {
     "application": "RDW",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "dw-monitor",
+    "message": "dw_cpu_pct=42",
+    "metric_name": "dw_cpu_pct",
+    "metric_value": 42,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 1620
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "JOB_RUN",
+    "level": "INFO",
+    "source_system": "scheduler",
+    "message": "ETL_AGG_DAILY started (scheduled 08:00; overlaps reporting window)",
+    "occurred_at": {
+      "minutes_ago": 1560
+    },
+    "attributes": {
+      "job": "ETL_AGG_DAILY"
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "METRIC",
+    "level": "WARNING",
+    "source_system": "dw-monitor",
+    "message": "dw_cpu_pct=71",
+    "metric_name": "dw_cpu_pct",
+    "metric_value": 71,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 1560
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "JOB_RUN",
+    "level": "INFO",
+    "source_system": "scheduler",
+    "message": "LIQUIDITY_REPORT started (window 120 min)",
+    "occurred_at": {
+      "minutes_ago": 1505
+    },
+    "attributes": {
+      "job": "LIQUIDITY_REPORT"
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "dw-monitor",
+    "message": "dw_cpu_pct=95",
+    "metric_name": "dw_cpu_pct",
+    "metric_value": 95,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 1500
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "LOG",
+    "level": "WARNING",
+    "source_system": "dw-log",
+    "message": "Query queue wait 45 s: 14 queries queued behind ETL_AGG_DAILY",
+    "occurred_at": {
+      "minutes_ago": 1470
+    },
+    "attributes": {
+      "queued": 14
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "dw-monitor",
+    "message": "dw_cpu_pct=96",
+    "metric_name": "dw_cpu_pct",
+    "metric_value": 96,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 1440
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "JOB_RUN",
+    "level": "ERROR",
+    "source_system": "scheduler",
+    "message": "LIQUIDITY_REPORT exceeded its 120-minute window and was killed",
+    "occurred_at": {
+      "minutes_ago": 1385
+    },
+    "attributes": {
+      "job": "LIQUIDITY_REPORT",
+      "runtime_min": 120
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "dw-monitor",
+    "message": "dw_cpu_pct=94",
+    "metric_name": "dw_cpu_pct",
+    "metric_value": 94,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 1380
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "JOB_RUN",
+    "level": "INFO",
+    "source_system": "scheduler",
+    "message": "ETL_AGG_DAILY completed after 270 min",
+    "occurred_at": {
+      "minutes_ago": 1290
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "dw-monitor",
+    "message": "dw_cpu_pct=48",
+    "metric_name": "dw_cpu_pct",
+    "metric_value": 48,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 1260
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "JOB_RUN",
+    "level": "INFO",
+    "source_system": "scheduler",
+    "message": "LIQUIDITY_REPORT rerun completed in 38 min",
+    "occurred_at": {
+      "minutes_ago": 1210
+    },
+    "attributes": {
+      "runtime_min": 38
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "dw-monitor",
+    "message": "dw_cpu_pct=40",
+    "metric_name": "dw_cpu_pct",
+    "metric_value": 40,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 1200
+    }
+  },
+  {
+    "application": "RDW",
     "event_type": "HEALTH_CHECK",
     "level": "INFO",
     "source_system": "health-monitor",
     "message": "data-warehouse health OK",
     "occurred_at": {
       "minutes_ago": 0
+    }
+  },
+  {
+    "application": "REC",
+    "event_type": "JOB_RUN",
+    "level": "INFO",
+    "source_system": "Control-M",
+    "message": "RECON_EOD_PAY ended OK; reconciled feed delivered to warehouse",
+    "occurred_at": {
+      "minutes_ago": 1530
     }
   },
   {

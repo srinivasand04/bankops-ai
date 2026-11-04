@@ -44,7 +44,9 @@ def test_request_shape_and_parsing():
     body = json.loads(requests[0].content)
     assert requests[0].url.path == "/api/chat"
     assert body["model"] == "qwen3:8b" and body["stream"] is False and body["think"] is False
-    assert body["options"] == {"num_ctx": 16384, "temperature": 0}
+    assert body["options"] == {"num_ctx": 8192, "temperature": 0}
+    assert body["keep_alive"] == "30m"
+    assert llm.prefers_compact_context is True
     assert body["messages"][0] == {"role": "system", "content": "rules"}
     assert body["messages"][1]["content"].startswith("facts") and "JSON" in body["messages"][1]["content"]
     assert "$ref" not in json.dumps(body["format"])  # schema inlined for the grammar converter
@@ -53,6 +55,14 @@ def test_request_shape_and_parsing():
     assert result.parsed.overall_confidence == "MEDIUM"
     assert result.model == "ollama/qwen3:8b"
     assert (result.input_tokens, result.output_tokens) == (6100, 2300)
+
+
+def test_context_window_grows_to_fit_the_prompt():
+    from app.ai.ollama import context_window
+
+    assert context_window("x" * 1000, 8192) == 8192  # small prompt: configured minimum
+    assert context_window("x" * 35_000, 8192) == 12288  # 10K tokens + answer reserve, rounded up
+    assert context_window("x" * 1_000_000, 8192) == 32768  # capped
 
 
 def test_inline_schema_resolves_nested_models():

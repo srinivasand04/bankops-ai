@@ -61,9 +61,12 @@ class Settings(BaseSettings):
 
     # ---- Ollama (local models) ----
     ollama_base_url: str = "http://localhost:11434"
-    ollama_model: str = "qwen3:8b"
-    # Context window in tokens. Ollama's default is too small for the fact base (~6K tokens) + answer.
-    ollama_num_ctx: int = Field(default=16384, ge=4096, le=131072)
+    ollama_model: str = "qwen3:4b"  # ~12 min per analysis on a laptop CPU; qwen3:8b ~17 min
+    # Minimum context window in tokens; raised automatically when a prompt needs more (see ollama.context_window).
+    ollama_num_ctx: int = Field(default=8192, ge=4096, le=131072)
+    # Compact fact base + field guide in the prompt (~1/3 fewer tokens; much faster on CPU)
+    ollama_compact: bool = True
+    ollama_keep_alive: str = "30m"
     # Qwen3 "thinking" improves reasoning but multiplies generated tokens - slow on a laptop CPU.
     ollama_think: bool = False
     ollama_timeout_seconds: float = Field(default=900, gt=0)

@@ -2,11 +2,13 @@
 
 import json
 import shutil
+from datetime import timedelta
 
 import pytest
 
 from app.ingestion.loader import LoadError, dry_run, load_dataset, source_counts
 from app.ingestion.reader import DatasetError, read_dataset
+from app.utils.time import utcnow
 from tests.conftest import SYNTHETIC_DATASET, headers
 
 
@@ -129,8 +131,16 @@ def test_operational_event_filters(client, seeded):
     ).json()
     assert errors and all(e["level"] in ("ERROR", "CRITICAL") and e["event_type"] == "LOG" for e in errors)
 
+    # The payment scenario's 10-minute series; older points belong to other incidents' evidence windows
+    since = (utcnow() - timedelta(hours=3)).isoformat()
     series = client.get(
-        f"/api/operational-events?application_id={apps['PAY']}&metric_name=http_5xx_rate_pct", headers=headers()
+        "/api/operational-events",
+        params={"application_id": apps["PAY"], "metric_name": "http_5xx_rate_pct", "occurred_from": since},
+        headers=headers(),
     ).json()
     assert len(series) == 13
     assert series[0]["metric_value"] < 1 < series[-1]["metric_value"]
+    all_time = client.get(
+        f"/api/operational-events?application_id={apps['PAY']}&metric_name=http_5xx_rate_pct", headers=headers()
+    ).json()
+    assert len(all_time) > len(series)

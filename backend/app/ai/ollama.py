@@ -41,9 +41,23 @@ def inline_schema(model: type[BaseModel]) -> dict:
     return resolve(schema)
 
 
+CHARS_PER_TOKEN = 3.5  # conservative estimate for JSON-heavy English text
+OUTPUT_RESERVE = 2048  # room for the answer
+MAX_CONTEXT = 32768
+
+
+def context_window(prompt: str, configured: int) -> int:
+    """Ollama silently drops the start of a prompt that exceeds num_ctx - size it to fit, never below
+    the configured value (a smaller window is faster on CPU)."""
+    needed = int(len(prompt) / CHARS_PER_TOKEN) + OUTPUT_RESERVE
+    return min(MAX_CONTEXT, max(configured, -(-needed // 1024) * 1024))
+
+
 class OllamaLlm:
     def __init__(self, settings: Settings, client: httpx.Client | None = None):
         self.settings = settings
+        # Read by analysis_service: send a compact fact base plus a field guide (see app/ai/compact.py)
+        self.prefers_compact_context = settings.ollama_compact
         self.client = client or httpx.Client(base_url=settings.ollama_base_url, timeout=settings.ollama_timeout_seconds)
 
     def structured(self, *, system: str, user: str, output_model: type[T]) -> LlmResult[T]:
@@ -57,7 +71,9 @@ class OllamaLlm:
             "format": inline_schema(output_model),
             "stream": False,
             "think": s.ollama_think,
-            "options": {"num_ctx": s.ollama_num_ctx, "temperature": 0},
+            # Keep the model (and its prompt-prefix cache) in memory between demo runs
+            "keep_alive": s.ollama_keep_alive,
+            "options": {"num_ctx": context_window(system + user, s.ollama_num_ctx), "temperature": 0},
         }
         try:
             response = self.client.post("/api/chat", json=payload)

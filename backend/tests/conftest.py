@@ -14,8 +14,22 @@ if not _test_url:
 if not _test_url.rsplit("/", 1)[-1].endswith("_test"):
     pytest.exit("Refusing to run: TEST_DATABASE_URL must point at a database whose name ends with '_test'", returncode=2)
 
-# Point the application at the test database *before* the engine is created.
+# Point the application at the test database *before* the engine is created, and pin AI settings so
+# results never depend on the developer's own .env (tests never call a real model).
 os.environ["DATABASE_URL"] = _test_url
+os.environ.update({
+    "AI_PROVIDER": "anthropic",
+    "ANTHROPIC_API_KEY": "",
+    "AI_MODEL": "claude-opus-5-5",
+    "AI_EFFORT": "high",
+    "AI_FALLBACKS_ENABLED": "true",
+    "OLLAMA_BASE_URL": "http://localhost:11434",
+    "OLLAMA_MODEL": "qwen3:8b",
+    "OLLAMA_NUM_CTX": "8192",
+    "OLLAMA_COMPACT": "true",
+    "OLLAMA_KEEP_ALIVE": "30m",
+    "OLLAMA_THINK": "false",
+})
 get_settings.cache_clear()
 
 from alembic import command  # noqa: E402

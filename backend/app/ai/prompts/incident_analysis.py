@@ -6,6 +6,8 @@ the user message.
 
 import json
 
+from app.ai.schemas import field_guide
+
 SYSTEM_PROMPT = """\
 You are the incident analyst for BankOps AI, a technology-operations platform used by a bank's IT \
 operations, production support and technology risk teams. You analyse one IT incident at a time and \
@@ -18,6 +20,9 @@ root causes and actions already on record, and similar recent incidents. Every i
 Times are given as `minutes_from_start`, relative to when business impact began.
 
 How to work:
+- summary answers the incident team's request directly in its first sentence (for example "Most likely \
+yes - ..." or "Unlikely - ..."), then gives the most likely cause and the current impact, in two or \
+three sentences. Never repeat the question back.
 - Reason only from the fact base. If something is not in the data, it is unknown - list it under \
 missing_information rather than assuming it. The environment is a demonstration with synthetic data.
 - confirmed_facts are statements the data directly shows, each citing the `id`s that prove it. \
@@ -27,7 +32,8 @@ is a fact about timing, while "the deployment caused the errors" is a hypothesis
 Give each a calibrated confidence between 0 and 1, cite supporting and contradicting evidence, say \
 what evidence is missing and how an engineer could verify it. Include plausible alternatives that the \
 evidence argues against, and say why. Never describe a hypothesis as confirmed; only a human reviewer \
-can confirm a root cause.
+can confirm a root cause. Categorise by where the fault lies: code or configuration shipped in a \
+release is APPLICATION, not INFRASTRUCTURE.
 - affected_services covers the incident's application and any dependency or dependent that the \
 evidence shows is impacted, using application codes from the fact base.
 - business_impact assesses customer, financial and regulatory exposure in banking terms, and states \
@@ -42,6 +48,22 @@ customer impact widening, or a critical dependency involved) and why.
 
 Write concisely for an experienced operations audience. Use the exact ids from the fact base when citing.\
 """
+
+# Small local models receive the output schema only as a decoding grammar - never its field
+# descriptions - and on a laptop CPU every generated token costs most of a second.
+COMPACT_GUIDANCE = """
+
+Answer briefly - you are running as a small local model. Limits: at most 6 confirmed_facts, 3 \
+root_cause_hypotheses, 4 affected_services and 5 recommended_actions; one sentence per text field; \
+at most 3 items in each list inside a hypothesis.
+
+Output fields:
+"""
+
+
+def system_prompt(compact: bool = False) -> str:
+    """Fixed text either way, so it stays cacheable (Claude prompt cache / Ollama prefix cache)."""
+    return SYSTEM_PROMPT + COMPACT_GUIDANCE + field_guide() if compact else SYSTEM_PROMPT
 
 
 def build_user_message(context: dict, focus: str | None) -> str:

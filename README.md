@@ -99,7 +99,7 @@ With `AUTH_ENABLED=false` (default) requests may send `X-User-Name` / `X-User-Ro
 
 The dataset in `backend/datasets/synthetic/` is loaded through the ingestion pipeline. It has five
 applications (Payment Processing, Core Banking, Customer Services, Transaction Reconciliation,
-Reporting & Data Warehouse) with dependencies, five change records, 83 operational events
+Reporting & Data Warehouse) with dependencies, five change records, 149 operational events
 (metrics, logs, alerts, job runs) and ten incidents, including the
 **main demo scenario**: Payment Processing release 2.4.1 (`CHG-2041`) deployed, HTTP 500s 30 minutes
 later (`INC-1007`, P1), reconciliation batch failure (`INC-1008`, P2) and Customer Services status

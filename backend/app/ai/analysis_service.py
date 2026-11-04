@@ -12,9 +12,10 @@ from datetime import timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.ai.compact import compact_context
 from app.ai.context import IncidentContext, build_incident_context
 from app.ai.llm import LlmClient
-from app.ai.prompts.incident_analysis import SYSTEM_PROMPT, build_user_message
+from app.ai.prompts.incident_analysis import build_user_message, system_prompt
 from app.ai.schemas import AgentExecutionOut, IncidentAnalysis, InvestigationOut, ReviewRequest
 from app.core.exceptions import BusinessRuleError, DomainError, NotFoundError
 from app.core.security import AI_ACTOR_PREFIX, CurrentUser, Role
@@ -81,6 +82,16 @@ def apply_guardrails(analysis: IncidentAnalysis, ctx: IncidentContext) -> tuple[
             "status": RootCauseStatus.HYPOTHESIS,  # never anything else for AI output
         })
     hypotheses.sort(key=lambda h: -h["confidence"])
+    # Small models sometimes repeat a hypothesis with a different confidence; keep the strongest copy.
+    unique, seen = [], set()
+    for h in hypotheses:
+        key = re.sub(r"\W+", " ", h["description"]).strip().lower()
+        if key in seen:
+            notes.append(f"duplicate hypothesis removed (confidence {h['confidence']}): {h['description'][:80]}")
+            continue
+        seen.add(key)
+        unique.append(h)
+    hypotheses = unique
 
     services = []
     for s in analysis.affected_services:
@@ -177,11 +188,16 @@ class AnalysisService:
         self.db.add(inv)
         self.db.commit()  # visible as RUNNING while Claude works
 
+        # Small local models get a compact fact base and an explicit field guide; Claude gets everything.
+        compact = getattr(llm, "prefers_compact_context", False)
+        mode = "compact" if compact else "full"
         try:
             ctx = build_incident_context(self.db, incident, now)
-            step.tool_calls = [{"tool": "build_incident_context", "result": ctx.counts()}]
+            if compact:
+                ctx = compact_context(ctx)
+            step.tool_calls = [{"tool": "build_incident_context", "mode": mode, "result": ctx.counts()}]
             result = llm.structured(
-                system=SYSTEM_PROMPT, user=build_user_message(ctx.data, focus), output_model=IncidentAnalysis
+                system=system_prompt(compact), user=build_user_message(ctx.data, focus), output_model=IncidentAnalysis
             )
             report, notes = apply_guardrails(result.parsed, ctx)
         except DomainError as exc:
@@ -194,14 +210,15 @@ class AnalysisService:
 
         finished = utcnow()
         report["guardrail_notes"] = notes
-        report["context_summary"] = ctx.counts()
+        report["context_summary"] = {"mode": mode, **ctx.counts()}
         inv.report = report
         inv.model_name = result.model
         inv.status = InvestigationStatus.AWAITING_REVIEW
         inv.completed_at = finished
         step.status = AgentExecutionStatus.COMPLETED
         step.output = {"request_id": result.request_id, "stop_reason": result.stop_reason,
-                       "cache_read_tokens": result.cache_read_tokens, "guardrail_notes": len(notes)}
+                       "cache_read_tokens": result.cache_read_tokens, "guardrail_notes": len(notes),
+                       "duration_seconds": round((finished - now).total_seconds(), 1)}
         step.input_tokens, step.output_tokens = result.input_tokens, result.output_tokens
         step.completed_at = finished
         self.db.flush()
@@ -276,7 +293,6 @@ class AnalysisService:
             + (f". Notes: {data.review_notes}" if data.review_notes else ""),
             user,
             details={"investigation_id": inv.id, "decision": data.decision, **applied},
-            at=now,
         )
         self.db.commit()
         return inv

@@ -39,8 +39,10 @@ services:
       AI_PROVIDER: ${AI_PROVIDER:-anthropic}
       # Ollama runs on the Windows host, not in a container ("localhost" inside the container is the container)
       OLLAMA_BASE_URL: ${OLLAMA_DOCKER_URL:-http://host.docker.internal:11434}
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:8b}
-      OLLAMA_NUM_CTX: ${OLLAMA_NUM_CTX:-16384}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:4b}
+      OLLAMA_NUM_CTX: ${OLLAMA_NUM_CTX:-8192}
+      OLLAMA_COMPACT: ${OLLAMA_COMPACT:-true}
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-30m}
       OLLAMA_THINK: ${OLLAMA_THINK:-false}
       OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-900}
       SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
