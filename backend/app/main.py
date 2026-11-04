@@ -3,6 +3,7 @@
 import logging
 import time
 import uuid
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -11,6 +12,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.ai.analysis_service import AnalysisService
 from app.api.deps import DbSession
 from app.api.routes import ai, analytics, applications, evidence, incidents, rca
 from app.core.config import get_settings
@@ -21,7 +23,21 @@ settings = get_settings()
 configure_logging(settings.log_level)
 logger = logging.getLogger("bankops")
 
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    # Background analyses do not survive a restart; don't leave them RUNNING forever.
+    try:
+        if interrupted := AnalysisService.fail_interrupted():
+            logger.warning("Marked %s interrupted AI analyses as FAILED", interrupted)
+    except SQLAlchemyError:
+        logger.exception("Could not check for interrupted AI analyses")
+    yield
+
+
 app = FastAPI(
+    lifespan=lifespan,
     title="BankOps AI",
     summary="Banking Operational Risk & IT Incident Intelligence Platform",
     description=(

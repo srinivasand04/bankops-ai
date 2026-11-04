@@ -17,6 +17,7 @@ from app.ai.context import IncidentContext, build_incident_context
 from app.ai.llm import LlmClient
 from app.ai.prompts.incident_analysis import build_user_message, system_prompt
 from app.ai.schemas import AgentExecutionOut, IncidentAnalysis, InvestigationOut, ReviewRequest
+from app.core.database import SessionLocal
 from app.core.exceptions import BusinessRuleError, DomainError, NotFoundError
 from app.core.security import AI_ACTOR_PREFIX, CurrentUser, Role
 from app.models import AgentExecution, Incident, InvestigationReport
@@ -171,8 +172,31 @@ class AnalysisService:
 
     # ---- analysis -----------------------------------------------------------------------
 
+    def list_recent(self, status: InvestigationStatus | None = None, limit: int = 50) -> list[InvestigationReport]:
+        stmt = select(InvestigationReport).order_by(InvestigationReport.created_at.desc()).limit(limit)
+        if status:
+            stmt = stmt.where(InvestigationReport.status == status)
+        return list(self.db.scalars(stmt))
+
     def analyze(self, incident_id: int, focus: str | None, user: CurrentUser, llm: LlmClient) -> InvestigationReport:
+        """Synchronous analysis: start + run in one call (scripts, tests, `?wait=true`)."""
+        inv = self.start(incident_id, focus, user)
+        return self.run(inv.id, llm)
+
+    def start(self, incident_id: int, focus: str | None, user: CurrentUser) -> InvestigationReport:
+        """Record a RUNNING investigation and return at once; `run` does the slow AI call."""
         incident = self.incidents.get(incident_id)
+        running = self.db.scalar(
+            select(InvestigationReport).where(
+                InvestigationReport.incident_id == incident.id,
+                InvestigationReport.status == InvestigationStatus.RUNNING,
+            )
+        )
+        if running is not None:
+            raise BusinessRuleError(
+                f"INV-{running.id} is already analysing {incident.reference_number}",
+                details={"investigation_id": running.id},
+            )
         now = utcnow()
         inv = InvestigationReport(
             incident_id=incident.id,
@@ -183,16 +207,25 @@ class AnalysisService:
             created_at=now,
             updated_at=now,
         )
-        step = AgentExecution(agent_name=AGENT_NAME, step_order=1, status=AgentExecutionStatus.RUNNING, started_at=now)
-        inv.executions.append(step)
+        inv.executions.append(
+            AgentExecution(agent_name=AGENT_NAME, step_order=1, status=AgentExecutionStatus.RUNNING, started_at=now)
+        )
         self.db.add(inv)
-        self.db.commit()  # visible as RUNNING while Claude works
+        self.db.commit()
+        return inv
+
+    def run(self, investigation_id: int, llm: LlmClient) -> InvestigationReport:
+        inv = self.get(investigation_id)
+        incident = self.incidents.get(inv.incident_id)
+        step = inv.executions[0]
+        now = step.started_at
+        focus = None if inv.request_text == "Full incident analysis" else inv.request_text
 
         # Small local models get a compact fact base and an explicit field guide; Claude gets everything.
         compact = getattr(llm, "prefers_compact_context", False)
         mode = "compact" if compact else "full"
         try:
-            ctx = build_incident_context(self.db, incident, now)
+            ctx = build_incident_context(self.db, incident, utcnow())
             if compact:
                 ctx = compact_context(ctx)
             step.tool_calls = [{"tool": "build_incident_context", "mode": mode, "result": ctx.counts()}]
@@ -233,6 +266,33 @@ class AnalysisService:
         )
         self.db.commit()
         return inv
+
+    @staticmethod
+    def run_in_background(investigation_id: int, llm: LlmClient) -> None:
+        """Entry point for FastAPI BackgroundTasks: own session; failures are recorded, never raised."""
+        with SessionLocal() as db:
+            try:
+                AnalysisService(db).run(investigation_id, llm)
+            except DomainError as exc:
+                logger.warning("Background analysis INV-%s failed: %s", investigation_id, exc.message)
+            except Exception:
+                logger.exception("Background analysis INV-%s crashed", investigation_id)
+
+    @staticmethod
+    def fail_interrupted() -> int:
+        """At startup: analyses still RUNNING were cut off by a restart - mark them FAILED."""
+        with SessionLocal() as db:
+            stale = list(db.scalars(select(InvestigationReport).where(
+                InvestigationReport.status == InvestigationStatus.RUNNING)))
+            for inv in stale:
+                inv.status = InvestigationStatus.FAILED
+                inv.error_message = "Interrupted: the backend restarted before the analysis finished"
+                inv.completed_at = utcnow()
+                for step in inv.executions:
+                    if step.status == AgentExecutionStatus.RUNNING:
+                        step.status = AgentExecutionStatus.FAILED
+            db.commit()
+            return len(stale)
 
     def _fail(self, inv: InvestigationReport, step: AgentExecution, message: str) -> None:
         self.db.rollback()

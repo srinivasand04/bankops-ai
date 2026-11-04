@@ -19,8 +19,8 @@ added in Phases 4-5.
 | 3 Incident Analytics | Summary, severity/category/application breakdowns, MTTR/MTTA, SLA compliance, trends, repeated incidents | Done |
 | 4 Data Ingestion + Evidence | Standard JSON datasets, 3-layer validation, loader CLI, `data_source` tagging, operational evidence (metrics/logs/alerts) | Done |
 | 5 Claude Integration | Fact base with citable evidence IDs, one structured Claude call, guardrails, human review gate | Done |
-| 6 Agentic AI | LangGraph supervisor + 5 specialist agents, tools, human review | Next |
-| 7 Frontend | Six screens | Scaffold + live KPI/active-incident view only |
+| 6 Frontend workflow UI | Incident list + create form, incident detail (assign, status, timeline, RCA, CAPA), AI investigation centre with live progress and approve/reject, user switcher | Done |
+| 7 Agentic AI | LangGraph supervisor + 5 specialist agents, tools, human review | Next |
 | 8 Real data + wrap-up | BPI 2014 (Rabobank) adapter with a small subset, final tests, demo docs | Planned |
 
 ## Quick start (Windows, PowerShell, Docker Desktop)
@@ -39,6 +39,11 @@ PostgreSQL is published on host port **5445** (5432-5434 are commonly used by ot
 change `POSTGRES_HOST_PORT` in `.env` if needed).
 
 ### Frontend (dev server)
+
+Pages: **Dashboard** (KPIs, AI review queue), **Incidents** (filters, *New incident* form, detail page
+with assign / status buttons / timeline notes / root-cause confirm-reject / CAPA), **AI investigations**
+(start an analysis, live progress, report, *Approve* / *Reject*). The *Acting as* selector switches
+between demo users (engineer, incident manager, viewer) to show the role rules.
 
 ```powershell
 cd frontend

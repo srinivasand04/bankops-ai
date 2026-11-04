@@ -34,16 +34,20 @@ Target: two-day MVP, prioritising a working end-to-end incident investigation wo
 - 22 tests with a fake LLM and a mocked SDK client
 - Free local provider: `OllamaLlm` (`AI_PROVIDER=ollama`, `qwen3:8b`), 11 tests with mocked HTTP
 
-## Phase 6 - Agentic AI (next)
+## Phase 6 - Frontend workflow UI ✅
+- Moved before the agentic phase so the human-in-the-loop workflow can be seen end to end
+- AI analysis runs in the background: `POST .../analyze` returns 202 with a RUNNING investigation; the page polls
+  until it is ready; interrupted runs are marked FAILED at startup; one running analysis per incident
+- Pages: dashboard, incident list + create form, incident detail (assign, status transitions, SLA, timeline notes,
+  root-cause confirm/reject, CAPA), AI investigation centre (start, live progress, report, approve/reject)
+- Demo user switcher (engineer / incident manager / viewer) to show role rules; React, TypeScript, Tailwind, react-router
+
+## Phase 7 - Agentic AI (next)
 - LangGraph state, supervisor with conditional routing, five specialist agents
 - Tools over existing services: `get_incident_details`, `get_incident_timeline`, `get_application_health`,
   `get_application_dependencies`, `get_related_changes`, `get_recent_deployments`, `calculate_incident_impact`,
   `calculate_operational_risk`, `get_incident_history`, `create_investigation_report`
 - Human review interrupt and approve/reject endpoint; `agent_executions` per step
-
-## Phase 7 - Frontend
-- Executive Dashboard (charts), Incident Management, Incident Details, Timeline, AI Investigation Centre, Analytics
-- Scaffold, API client, types and a live KPI/active-incident view exist today
 
 ## Phase 8 - Real data (BPI 2014) + wrap-up
 - Adapter: raw Rabobank BPI Challenge 2014 CSVs → small curated standard dataset (`datasets/bpi2014`)

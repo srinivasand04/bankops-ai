@@ -88,7 +88,7 @@ def p1(client, seeded):
 
 def _analyze(client, incident_id, focus=None, role="ENGINEER"):
     body = {"focus": focus} if focus else None
-    return client.post(f"/api/ai/incidents/{incident_id}/analyze", json=body, headers=headers(role, "a.patel"))
+    return client.post(f"/api/ai/incidents/{incident_id}/analyze?wait=true", json=body, headers=headers(role, "a.patel"))
 
 
 # ---- fact base -----------------------------------------------------------------------------
@@ -287,3 +287,57 @@ def test_consequential_action_detection(text, consequential):
     from app.ai.analysis_service import CONSEQUENTIAL
 
     assert bool(CONSEQUENTIAL.search(text)) is consequential
+
+
+# ---- background analysis (the UI flow) ---------------------------------------------------
+
+
+def test_analyze_returns_202_and_finishes_in_background(client, p1, fake_llm):
+    response = client.post(f"/api/ai/incidents/{p1['id']}/analyze", headers=headers("ENGINEER"))
+    assert response.status_code == 202
+    started = response.json()
+    assert started["status"] == "RUNNING" and started["report"] is None
+
+    # TestClient runs background tasks before returning, so the result is already stored
+    done = client.get(f"/api/ai/investigations/{started['id']}", headers=headers()).json()
+    assert done["status"] == "AWAITING_REVIEW"
+    assert done["report"]["summary"]
+    assert len(fake_llm.calls) == 1
+
+
+def test_background_failure_is_recorded(client, p1):
+    app.dependency_overrides[get_llm] = lambda: FakeLlm(error=AiUnavailableError("Ollama is not reachable"))
+    try:
+        started = client.post(f"/api/ai/incidents/{p1['id']}/analyze", headers=headers("ENGINEER"))
+    finally:
+        app.dependency_overrides.pop(get_llm, None)
+    assert started.status_code == 202
+    inv = client.get(f"/api/ai/investigations/{started.json()['id']}", headers=headers()).json()
+    assert inv["status"] == "FAILED" and inv["error_message"] == "Ollama is not reachable"
+
+
+def test_second_analysis_blocked_while_one_is_running(db, client, p1):
+    from app.ai.analysis_service import AnalysisService
+
+    AnalysisService(db).start(p1["id"], None, CurrentUser("a.patel", Role.ENGINEER))  # stays RUNNING
+    response = client.post(f"/api/ai/incidents/{p1['id']}/analyze", headers=headers("ENGINEER"))
+    assert response.status_code == 422
+    assert "already analysing" in response.json()["error"]["message"]
+
+
+def test_interrupted_analyses_are_failed_at_startup(db, p1):
+    from app.ai.analysis_service import AnalysisService
+
+    inv = AnalysisService(db).start(p1["id"], None, CurrentUser("a.patel", Role.ENGINEER))
+    assert AnalysisService.fail_interrupted() == 1
+    db.expire_all()
+    assert AnalysisService(db).get(inv.id).status == "FAILED"
+
+
+def test_recent_investigations_list(client, p1, fake_llm):
+    _analyze(client, p1["id"])
+    _analyze(client, p1["id"])
+    listed = client.get("/api/ai/investigations", headers=headers("VIEWER")).json()
+    assert [i["id"] for i in listed] == sorted((i["id"] for i in listed), reverse=True)
+    awaiting = client.get("/api/ai/investigations?status=AWAITING_REVIEW", headers=headers()).json()
+    assert len(awaiting) == 2 and all(i["incident_reference"] == "INC-1007" for i in awaiting)

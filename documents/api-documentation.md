@@ -96,7 +96,8 @@ All accept `created_from`, `created_to`, `application_id` unless noted.
 |---|---|---|
 | GET | `/api/ai/status` | VIEWER |
 | GET | `/api/ai/incidents/{id}/context` | VIEWER - exact fact base sent to Claude |
-| POST | `/api/ai/incidents/{id}/analyze` | ENGINEER - `{"focus": "..."}` optional; 201, or 503 `ai_unavailable` / 502 `ai_response_invalid` |
+| POST | `/api/ai/incidents/{id}/analyze` | ENGINEER - `{"focus": "..."}` optional. Returns **202** with a RUNNING investigation and works in the background (poll the GET below); `?wait=true` blocks and returns 201, or 503 `ai_unavailable` / 502 `ai_response_invalid`. 422 if one is already running for the incident |
+| GET | `/api/ai/investigations?status=&limit=` | VIEWER - all investigations, newest first |
 | GET | `/api/ai/incidents/{id}/investigations` | VIEWER |
 | GET | `/api/ai/investigations/{id}` | VIEWER |
 | POST | `/api/ai/investigations/{id}/review` | INCIDENT_MANAGER, human only |

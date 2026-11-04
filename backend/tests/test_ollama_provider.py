@@ -112,7 +112,7 @@ def test_end_to_end_analysis_with_local_model(client, seeded):
     app.dependency_overrides[get_llm] = lambda: llm
     try:
         p1 = client.get("/api/incidents/by-reference/INC-1007", headers=headers()).json()
-        inv = client.post(f"/api/ai/incidents/{p1['id']}/analyze", headers=headers("ENGINEER")).json()
+        inv = client.post(f"/api/ai/incidents/{p1['id']}/analyze?wait=true", headers=headers("ENGINEER")).json()
     finally:
         app.dependency_overrides.pop(get_llm, None)
 

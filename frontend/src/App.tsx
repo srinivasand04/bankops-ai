@@ -1,22 +1,34 @@
-import { Landmark } from "lucide-react";
+import { useState } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
+import Layout from "./components/Layout";
 import DashboardPage from "./pages/DashboardPage";
+import IncidentDetailPage from "./pages/IncidentDetailPage";
+import IncidentsPage from "./pages/IncidentsPage";
+import InvestigationDetailPage from "./pages/InvestigationDetailPage";
+import InvestigationsPage from "./pages/InvestigationsPage";
+import { getIdentity, setIdentity, type Identity } from "./services/identity";
 
 export default function App() {
+  const [identity, setIdentityState] = useState<Identity>(getIdentity());
+
+  const changeIdentity = (next: Identity) => {
+    setIdentity(next);
+    setIdentityState(next);
+  };
+
   return (
-    <div className="min-h-screen">
-      <header className="bg-navy-950 text-white">
-        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
-          <Landmark size={22} />
-          <div>
-            <div className="font-semibold">BankOps AI</div>
-            <div className="text-xs text-slate-300">Banking Operational Risk &amp; IT Incident Intelligence</div>
-          </div>
-        </div>
-      </header>
-      <main className="mx-auto max-w-7xl px-4 py-6">
-        <DashboardPage />
-      </main>
-    </div>
+    <BrowserRouter>
+      <Layout identity={identity} onIdentityChange={changeIdentity}>
+        {/* key: remount pages when the user changes so data and permissions refresh */}
+        <Routes key={identity.name}>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/incidents" element={<IncidentsPage />} />
+          <Route path="/incidents/:id" element={<IncidentDetailPage identity={identity} />} />
+          <Route path="/investigations" element={<InvestigationsPage identity={identity} />} />
+          <Route path="/investigations/:id" element={<InvestigationDetailPage identity={identity} />} />
+        </Routes>
+      </Layout>
+    </BrowserRouter>
   );
 }

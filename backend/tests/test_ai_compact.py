@@ -67,7 +67,7 @@ def test_compact_timeline_drops_ai_entries(client, db, seeded):
     app.dependency_overrides[get_llm] = lambda: FakeLlm()
     try:
         p1 = client.get("/api/incidents/by-reference/INC-1007", headers=headers()).json()
-        inv = client.post(f"/api/ai/incidents/{p1['id']}/analyze", headers=headers("ENGINEER")).json()
+        inv = client.post(f"/api/ai/incidents/{p1['id']}/analyze?wait=true", headers=headers("ENGINEER")).json()
         client.post(f"/api/ai/investigations/{inv['id']}/review", json={"decision": "APPROVE"}, headers=headers())
     finally:
         app.dependency_overrides.pop(get_llm, None)
@@ -84,7 +84,7 @@ def test_approval_event_is_last_on_the_timeline(client, seeded):
     app.dependency_overrides[get_llm] = lambda: FakeLlm()
     try:
         p1 = client.get("/api/incidents/by-reference/INC-1007", headers=headers()).json()
-        inv = client.post(f"/api/ai/incidents/{p1['id']}/analyze", headers=headers("ENGINEER")).json()
+        inv = client.post(f"/api/ai/incidents/{p1['id']}/analyze?wait=true", headers=headers("ENGINEER")).json()
         client.post(f"/api/ai/investigations/{inv['id']}/review", json={"decision": "APPROVE"}, headers=headers())
     finally:
         app.dependency_overrides.pop(get_llm, None)
@@ -122,7 +122,7 @@ def test_compact_mode_end_to_end_uses_compact_ids(client, seeded):
     app.dependency_overrides[get_llm] = lambda: fake
     try:
         p1 = client.get("/api/incidents/by-reference/INC-1007", headers=headers()).json()
-        inv = client.post(f"/api/ai/incidents/{p1['id']}/analyze", headers=headers("ENGINEER")).json()
+        inv = client.post(f"/api/ai/incidents/{p1['id']}/analyze?wait=true", headers=headers("ENGINEER")).json()
     finally:
         app.dependency_overrides.pop(get_llm, None)
 
