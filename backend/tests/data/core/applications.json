@@ -1,0 +1,52 @@
+[
+  {
+    "code": "PAY",
+    "name": "Payment Processing",
+    "description": "Processes customer payments (domestic transfers, card settlements) via REST API.",
+    "business_service": "Payments",
+    "business_criticality": "TIER_1",
+    "technology_stack": "Java 21 / Spring Boot REST API, PostgreSQL, Kafka",
+    "owner_team": "Payments Production Support",
+    "health_status": "DEGRADED"
+  },
+  {
+    "code": "CBS",
+    "name": "Core Banking",
+    "description": "System of record for customer accounts, balances and ledger postings.",
+    "business_service": "Accounts & Ledger",
+    "business_criticality": "TIER_1",
+    "technology_stack": "Core banking package, Oracle Database, IBM MQ",
+    "owner_team": "Core Banking Support",
+    "health_status": "HEALTHY"
+  },
+  {
+    "code": "CUS",
+    "name": "Customer Services",
+    "description": "API layer that provides customer, account and transaction status information to channels.",
+    "business_service": "Customer Channels",
+    "business_criticality": "TIER_2",
+    "technology_stack": "Python FastAPI microservice, Redis cache, OAuth2 / SSO",
+    "owner_team": "Digital Channels Support",
+    "health_status": "DEGRADED"
+  },
+  {
+    "code": "REC",
+    "name": "Transaction Reconciliation",
+    "description": "Reconciles payment transactions against core banking ledger postings.",
+    "business_service": "Finance Operations",
+    "business_criticality": "TIER_2",
+    "technology_stack": "Python batch jobs, SQL, Control-M scheduler",
+    "owner_team": "Reconciliation Operations",
+    "health_status": "DEGRADED"
+  },
+  {
+    "code": "RDW",
+    "name": "Reporting & Data Warehouse",
+    "description": "Generates financial, regulatory and operational reports.",
+    "business_service": "Finance & Regulatory Reporting",
+    "business_criticality": "TIER_3",
+    "technology_stack": "SQL data warehouse, ETL pipelines, BI dashboards",
+    "owner_team": "Data Platform Support",
+    "health_status": "HEALTHY"
+  }
+]

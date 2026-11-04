@@ -1,0 +1,90 @@
+[
+  {
+    "change_reference": "CHG-2030",
+    "application": "CBS",
+    "title": "Database listener and failover configuration update",
+    "description": "Adjusted Oracle listener connection limits and failover settings.",
+    "change_type": "NORMAL",
+    "status": "IMPLEMENTED",
+    "risk_level": "MEDIUM",
+    "implementer": "d.okafor",
+    "approver": "cab.chair",
+    "rollback_plan": "Restore previous listener.ora from configuration baseline.",
+    "deployed_at": {
+      "minutes_ago": 8730
+    },
+    "planned_start": {
+      "minutes_ago": 8760
+    }
+  },
+  {
+    "change_reference": "CHG-2035",
+    "application": "CUS",
+    "title": "Customer Services API release 5.2.0",
+    "description": "New account summary endpoint and SSO library upgrade.",
+    "change_type": "NORMAL",
+    "status": "IMPLEMENTED",
+    "risk_level": "MEDIUM",
+    "version": "5.2.0",
+    "implementer": "l.moreau",
+    "approver": "cab.chair",
+    "rollback_plan": "Blue/green switch back to 5.1.3.",
+    "deployed_at": {
+      "minutes_ago": 4440
+    },
+    "planned_start": {
+      "minutes_ago": 4470
+    }
+  },
+  {
+    "change_reference": "CHG-2038",
+    "application": "CBS",
+    "title": "Monthly OS security patching (core banking app tier)",
+    "description": "Standard pre-approved OS patching of application servers.",
+    "change_type": "STANDARD",
+    "status": "IMPLEMENTED",
+    "risk_level": "LOW",
+    "implementer": "infra.automation",
+    "approver": "standard-change-catalogue",
+    "rollback_plan": "Snapshot restore.",
+    "deployed_at": {
+      "minutes_ago": 2880
+    },
+    "planned_start": {
+      "minutes_ago": 2910
+    }
+  },
+  {
+    "change_reference": "CHG-2041",
+    "application": "PAY",
+    "title": "Payment Processing API release 2.4.1",
+    "description": "Adds real-time fraud-scoring call to the payment authorisation path and refactors database connection pool configuration (max pool size, timeouts).",
+    "change_type": "NORMAL",
+    "status": "IMPLEMENTED",
+    "risk_level": "HIGH",
+    "version": "2.4.1",
+    "implementer": "r.singh",
+    "approver": "cab.chair",
+    "rollback_plan": "Redeploy 2.4.0 via release pipeline (approx. 15 minutes); requires emergency CAB approval.",
+    "deployed_at": {
+      "minutes_ago": 95
+    },
+    "planned_start": {
+      "minutes_ago": 125
+    }
+  },
+  {
+    "change_reference": "CHG-2042",
+    "application": "RDW",
+    "title": "ETL schedule optimisation for month-end reporting",
+    "description": "Moves heavy aggregation jobs out of the business-hours window.",
+    "change_type": "NORMAL",
+    "status": "PLANNED",
+    "risk_level": "LOW",
+    "implementer": "m.tanaka",
+    "rollback_plan": "Revert scheduler definitions.",
+    "planned_start": {
+      "minutes_from_now": 1440
+    }
+  }
+]

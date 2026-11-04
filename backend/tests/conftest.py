@@ -43,7 +43,9 @@ from app.ingestion.loader import load_dataset, reset_all  # noqa: E402
 from app.ingestion.reader import read_dataset  # noqa: E402
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
-SYNTHETIC_DATASET = BACKEND_DIR / "datasets" / "synthetic"
+# Tests use a frozen copy so their exact numbers never change when the demo dataset grows.
+SYNTHETIC_DATASET = BACKEND_DIR / "tests" / "data" / "core"
+DEMO_DATASET = BACKEND_DIR / "datasets" / "synthetic"
 
 
 @pytest.fixture(scope="session", autouse=True)

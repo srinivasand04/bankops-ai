@@ -1,0 +1,516 @@
+[
+  {
+    "reference": "INC-1001",
+    "application": "PAY",
+    "title": "Payment Processing unavailable - storage array failover",
+    "description": "Primary storage array controller failure caused Payment Processing database volumes to go read-only. Payments unavailable until failover to the secondary controller completed.",
+    "severity": "P1",
+    "category": "INFRASTRUCTURE",
+    "business_impact": "Complete payment processing outage for 75 minutes.",
+    "created_by": "monitoring.integration",
+    "created_at": {
+      "minutes_ago": 17280
+    },
+    "started_at": {
+      "minutes_ago": 17290
+    },
+    "resolution_summary": "Manual failover to secondary storage controller; database volumes remounted read-write.",
+    "history": [
+      {
+        "type": "assign",
+        "after_minutes": 5,
+        "team": "Infrastructure Operations",
+        "engineer": "s.novak"
+      },
+      {
+        "type": "status",
+        "after_minutes": 7,
+        "status": "ESCALATED",
+        "note": "Major incident declared; vendor engaged"
+      },
+      {
+        "type": "status",
+        "after_minutes": 20,
+        "status": "INVESTIGATING",
+        "note": "Vendor confirms controller fault"
+      },
+      {
+        "type": "status",
+        "after_minutes": 75,
+        "status": "RESOLVED",
+        "note": "Failover to secondary controller completed; payments flowing"
+      },
+      {
+        "type": "status",
+        "after_minutes": 4320,
+        "status": "CLOSED",
+        "note": "Post-incident review completed"
+      }
+    ],
+    "root_causes": [
+      {
+        "description": "Storage controller firmware defect caused controller failure; automatic failover did not trigger.",
+        "category": "INFRASTRUCTURE",
+        "status": "CONFIRMED",
+        "supporting_evidence": [
+          "Vendor RCA report VND-5521 (synthetic)",
+          "Controller event logs"
+        ],
+        "missing_evidence": [],
+        "created_by": "s.novak",
+        "confirmed_by": "incident.manager"
+      }
+    ],
+    "actions": [
+      {
+        "action_type": "CORRECTIVE",
+        "description": "Fail over to secondary storage controller and validate database integrity.",
+        "assigned_team": "Infrastructure Operations",
+        "assigned_owner": "s.novak",
+        "due_in_days": -12,
+        "status": "COMPLETED"
+      },
+      {
+        "action_type": "PREVENTIVE",
+        "description": "Apply vendor firmware fix and test automatic failover quarterly.",
+        "assigned_team": "Infrastructure Operations",
+        "assigned_owner": "s.novak",
+        "due_in_days": 14,
+        "status": "IN_PROGRESS"
+      }
+    ],
+    "rca": {
+      "summary": "Firmware defect in storage controller; automatic failover failed.",
+      "confirmed_facts": [
+        "Controller A failed at incident start",
+        "Automatic failover did not trigger"
+      ],
+      "contributing_factors": [
+        "Failover not tested since last firmware upgrade"
+      ],
+      "status": "APPROVED"
+    }
+  },
+  {
+    "reference": "INC-1002",
+    "application": "REC",
+    "title": "End-of-day reconciliation batch failed on malformed record",
+    "description": "RECON_EOD_PAY aborted on a malformed currency code in the payment extract (synthetic record).",
+    "severity": "P3",
+    "category": "BATCH_PROCESSING",
+    "business_impact": "EOD reconciliation completed 3 hours late.",
+    "created_by": "controlm.alerts",
+    "created_at": {
+      "minutes_ago": 12960
+    },
+    "started_at": {
+      "minutes_ago": 12990
+    },
+    "resolution_summary": "Malformed record quarantined; batch rerun completed.",
+    "history": [
+      {
+        "type": "assign",
+        "after_minutes": 25,
+        "team": "Reconciliation Operations",
+        "engineer": "j.chen"
+      },
+      {
+        "type": "status",
+        "after_minutes": 30,
+        "status": "INVESTIGATING"
+      },
+      {
+        "type": "status",
+        "after_minutes": 200,
+        "status": "RESOLVED",
+        "note": "Record quarantined and batch rerun"
+      },
+      {
+        "type": "status",
+        "after_minutes": 1440,
+        "status": "CLOSED"
+      }
+    ],
+    "actions": [
+      {
+        "action_type": "PREVENTIVE",
+        "description": "Add schema validation for currency codes in the extract loader.",
+        "assigned_team": "Reconciliation Operations",
+        "assigned_owner": "j.chen",
+        "due_in_days": 5,
+        "status": "OPEN"
+      }
+    ]
+  },
+  {
+    "reference": "INC-1003",
+    "application": "CBS",
+    "title": "Core Banking database connectivity failures",
+    "description": "Application servers intermittently unable to obtain Oracle connections (ORA-12519) after database node failover; balance enquiries and postings failing intermittently.",
+    "severity": "P2",
+    "category": "DATABASE",
+    "business_impact": "Intermittent failures for balance enquiries and ledger postings; payments retried.",
+    "created_by": "monitoring.integration",
+    "created_at": {
+      "minutes_ago": 8640
+    },
+    "started_at": {
+      "minutes_ago": 8660
+    },
+    "resolution_summary": "Restored previous listener process limit and restarted listener on both nodes.",
+    "history": [
+      {
+        "type": "assign",
+        "after_minutes": 15,
+        "team": "Core Banking Support",
+        "engineer": "d.okafor"
+      },
+      {
+        "type": "status",
+        "after_minutes": 20,
+        "status": "INVESTIGATING"
+      },
+      {
+        "type": "event",
+        "after_minutes": 60,
+        "event_type": "EVIDENCE_ADDED",
+        "description": "Listener log shows connection limit reached after CHG-2030.",
+        "actor": "d.okafor"
+      },
+      {
+        "type": "status",
+        "after_minutes": 180,
+        "status": "RESOLVED",
+        "note": "Listener process limit restored"
+      },
+      {
+        "type": "status",
+        "after_minutes": 2880,
+        "status": "CLOSED"
+      }
+    ],
+    "change_links": [
+      {
+        "change_reference": "CHG-2030",
+        "link_status": "CONFIRMED",
+        "notes": "Listener connection limit lowered by this change."
+      }
+    ],
+    "root_causes": [
+      {
+        "description": "CHG-2030 lowered listener process limit below peak connection demand after failover.",
+        "category": "DATABASE",
+        "status": "CONFIRMED",
+        "supporting_evidence": [
+          "ORA-12519 errors",
+          "Listener configuration diff"
+        ],
+        "missing_evidence": [],
+        "created_by": "d.okafor",
+        "confirmed_by": "incident.manager"
+      }
+    ],
+    "actions": [
+      {
+        "action_type": "CORRECTIVE",
+        "description": "Restore listener process limit to baseline value.",
+        "assigned_team": "Core Banking Support",
+        "assigned_owner": "d.okafor",
+        "due_in_days": -6,
+        "status": "COMPLETED"
+      },
+      {
+        "action_type": "PREVENTIVE",
+        "description": "Add connection-capacity check to the database change review checklist.",
+        "assigned_team": "Change Management",
+        "assigned_owner": "cab.chair",
+        "due_in_days": -1,
+        "status": "OPEN"
+      }
+    ]
+  },
+  {
+    "reference": "INC-1004",
+    "application": "CUS",
+    "title": "Customers unable to log in - SSO token validation failures",
+    "description": "Login failures (HTTP 401) for a subset of customers after the SSO library upgrade; token signature validation rejected keys after scheduled key rotation.",
+    "severity": "P2",
+    "category": "AUTHENTICATION",
+    "business_impact": "Approx. 30% of synthetic login attempts failing on digital channels.",
+    "created_by": "l.moreau",
+    "created_at": {
+      "minutes_ago": 4305
+    },
+    "started_at": {
+      "minutes_ago": 4320
+    },
+    "resolution_summary": "Configured SSO library to refresh JWKS keys on rotation; cache flushed.",
+    "history": [
+      {
+        "type": "assign",
+        "after_minutes": 40,
+        "team": "Digital Channels Support",
+        "engineer": "l.moreau"
+      },
+      {
+        "type": "status",
+        "after_minutes": 45,
+        "status": "INVESTIGATING"
+      },
+      {
+        "type": "status",
+        "after_minutes": 300,
+        "status": "RESOLVED",
+        "note": "JWKS cache refresh fixed; library config corrected"
+      }
+    ],
+    "change_links": [
+      {
+        "change_reference": "CHG-2035",
+        "link_status": "SUSPECTED",
+        "notes": "SSO library upgraded in 5.2.0."
+      }
+    ]
+  },
+  {
+    "reference": "INC-1005",
+    "application": "RDW",
+    "title": "Month-end reporting queries running slowly",
+    "description": "Finance dashboard queries exceeding 60 s; warehouse CPU at 95% during ETL overlap.",
+    "severity": "P3",
+    "category": "PERFORMANCE",
+    "business_impact": "Finance report preparation delayed.",
+    "created_by": "m.tanaka",
+    "created_at": {
+      "minutes_ago": 2880
+    },
+    "started_at": {
+      "minutes_ago": 2910
+    },
+    "resolution_summary": "Rescheduled overlapping ETL aggregation jobs; CHG-2042 raised for permanent fix.",
+    "history": [
+      {
+        "type": "assign",
+        "after_minutes": 30,
+        "team": "Data Platform Support",
+        "engineer": "m.tanaka"
+      },
+      {
+        "type": "status",
+        "after_minutes": 60,
+        "status": "INVESTIGATING"
+      },
+      {
+        "type": "status",
+        "after_minutes": 600,
+        "status": "RESOLVED",
+        "note": "Heavy ETL jobs rescheduled"
+      },
+      {
+        "type": "status",
+        "after_minutes": 1440,
+        "status": "CLOSED"
+      }
+    ]
+  },
+  {
+    "reference": "INC-1006",
+    "application": "RDW",
+    "title": "Regulatory report generation timing out",
+    "description": "Liquidity report job exceeded its 2-hour window; same ETL contention pattern as earlier this week.",
+    "severity": "P3",
+    "category": "PERFORMANCE",
+    "business_impact": "Regulatory report submission at risk if not completed by cut-off (synthetic).",
+    "created_by": "m.tanaka",
+    "created_at": {
+      "minutes_ago": 1440
+    },
+    "started_at": {
+      "minutes_ago": 1500
+    },
+    "resolution_summary": "Report re-run successfully after ETL jobs completed.",
+    "history": [
+      {
+        "type": "assign",
+        "after_minutes": 20,
+        "team": "Data Platform Support",
+        "engineer": "m.tanaka"
+      },
+      {
+        "type": "status",
+        "after_minutes": 30,
+        "status": "INVESTIGATING"
+      },
+      {
+        "type": "status",
+        "after_minutes": 240,
+        "status": "RESOLVED",
+        "note": "Report re-run outside ETL window"
+      }
+    ]
+  },
+  {
+    "reference": "INC-1007",
+    "application": "PAY",
+    "title": "Payment API returning HTTP 500 errors after release 2.4.1",
+    "description": "Synthetic monitoring and APM show HTTP 500 responses on POST /payments/authorise rising from a 0.2% baseline to 18% approximately 30 minutes after release 2.4.1. p95 latency increased from 350 ms to 4.2 s. Payment authorisation throughput has dropped by roughly 60%.",
+    "severity": "P1",
+    "category": "API_INTEGRATION",
+    "business_impact": "Customer payments are failing or delayed across mobile and online banking. Downstream reconciliation and customer transaction status services are affected.",
+    "created_by": "monitoring.integration",
+    "created_at": {
+      "minutes_ago": 50
+    },
+    "started_at": {
+      "minutes_ago": 65
+    },
+    "history": [
+      {
+        "type": "assign",
+        "after_minutes": 6,
+        "team": "Payments Production Support",
+        "engineer": "a.patel"
+      },
+      {
+        "type": "status",
+        "after_minutes": 8,
+        "status": "INVESTIGATING",
+        "note": "Bridge call opened; release team engaged"
+      },
+      {
+        "type": "event",
+        "after_minutes": 12,
+        "event_type": "EVIDENCE_ADDED",
+        "description": "APM: 500 errors concentrated on /payments/authorise; stack traces show 'ConnectionPoolTimeoutException: no connection available within 3000 ms'.",
+        "actor": "a.patel"
+      },
+      {
+        "type": "event",
+        "after_minutes": 18,
+        "event_type": "EVIDENCE_ADDED",
+        "description": "DB metrics: active connections pinned at new pool max (20, previously 100); fraud-scoring call adds ~900 ms while holding a DB connection.",
+        "actor": "a.patel"
+      },
+      {
+        "type": "event",
+        "after_minutes": 25,
+        "event_type": "INVESTIGATION_UPDATE",
+        "description": "Deployment of CHG-2041 (v2.4.1) occurred 30 minutes before error onset. Rollback is being prepared but requires emergency CAB approval.",
+        "actor": "incident.manager"
+      }
+    ],
+    "change_links": [
+      {
+        "change_reference": "CHG-2041",
+        "link_status": "SUSPECTED",
+        "notes": "Error onset ~30 minutes after deployment; pool config changed."
+      }
+    ],
+    "root_causes": [
+      {
+        "description": "Connection pool maximum reduced from 100 to 20 in release 2.4.1 while the new synchronous fraud-scoring call holds connections longer, exhausting the pool under peak load.",
+        "category": "APPLICATION",
+        "status": "HYPOTHESIS",
+        "confidence": 0.6,
+        "supporting_evidence": [
+          "ConnectionPoolTimeoutException in application logs",
+          "Active DB connections pinned at 20",
+          "Error onset 30 minutes after CHG-2041"
+        ],
+        "missing_evidence": [
+          "Configuration diff between 2.4.0 and 2.4.1",
+          "Load test results for 2.4.1",
+          "Fraud-scoring service latency metrics"
+        ],
+        "created_by": "a.patel"
+      }
+    ],
+    "actions": [
+      {
+        "action_type": "CORRECTIVE",
+        "description": "Prepare rollback of Payment Processing to 2.4.0 pending emergency CAB approval.",
+        "assigned_team": "Release Management",
+        "assigned_owner": "r.singh",
+        "due_in_days": 0,
+        "status": "IN_PROGRESS"
+      }
+    ]
+  },
+  {
+    "reference": "INC-1008",
+    "application": "REC",
+    "title": "Intraday payments reconciliation batch failed",
+    "description": "Control-M job RECON_INTRADAY_PAY ended NOTOK. The payment transaction extract was incomplete (timeouts reading from Payment Processing) causing 4,120 synthetic transactions to be unmatched.",
+    "severity": "P2",
+    "category": "BATCH_PROCESSING",
+    "business_impact": "Intraday reconciliation position unavailable to Finance Operations; break queue growing.",
+    "created_by": "controlm.alerts",
+    "created_at": {
+      "minutes_ago": 35
+    },
+    "started_at": {
+      "minutes_ago": 40
+    },
+    "history": [
+      {
+        "type": "assign",
+        "after_minutes": 10,
+        "team": "Reconciliation Operations",
+        "engineer": "j.chen"
+      },
+      {
+        "type": "status",
+        "after_minutes": 15,
+        "status": "INVESTIGATING",
+        "note": "Suspected dependency on Payment Processing incident"
+      },
+      {
+        "type": "event",
+        "after_minutes": 20,
+        "event_type": "EVIDENCE_ADDED",
+        "description": "Extract step log: 'HTTP 500 from payment-api /transactions/export after 3 retries'.",
+        "actor": "j.chen"
+      }
+    ]
+  },
+  {
+    "reference": "INC-1009",
+    "application": "CUS",
+    "title": "Customer transaction status updates delayed",
+    "description": "Customer Services API reports stale payment status for recent transactions; status refresh calls to Payment Processing are timing out and falling back to cached values.",
+    "severity": "P3",
+    "category": "PERFORMANCE",
+    "business_impact": "Customers see 'pending' for completed payments; contact centre volume rising.",
+    "created_by": "l.moreau",
+    "created_at": {
+      "minutes_ago": 25
+    },
+    "started_at": {
+      "minutes_ago": 30
+    },
+    "history": [
+      {
+        "type": "assign",
+        "after_minutes": 12,
+        "team": "Digital Channels Support",
+        "engineer": "l.moreau"
+      }
+    ]
+  },
+  {
+    "reference": "INC-1010",
+    "application": "CUS",
+    "title": "Incorrect label on account summary response field",
+    "description": "The account summary API returns 'availableBalanceTxt' instead of the documented field label.",
+    "severity": "P4",
+    "category": "APPLICATION",
+    "business_impact": "Cosmetic; channel teams have a workaround.",
+    "created_by": "qa.tester",
+    "created_at": {
+      "minutes_ago": 10
+    },
+    "started_at": {
+      "minutes_ago": 20
+    }
+  }
+]

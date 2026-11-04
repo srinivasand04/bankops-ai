@@ -512,5 +512,133 @@
     "started_at": {
       "minutes_ago": 20
     }
+  },
+  {
+    "reference": "INC-1011",
+    "application": "CBS",
+    "severity": "P2",
+    "category": "DATABASE",
+    "title": "Core banking balance enquiries timing out",
+    "description": "Balance enquiry p95 latency rose above 5 s during the morning peak; mobile and online banking show a spinner when customers open their accounts. Ledger postings are not affected.",
+    "business_impact": "Customers cannot see balances in mobile and online banking; contact centre calls rising.",
+    "created_by": "monitoring.integration",
+    "created_at": {
+      "minutes_ago": 22
+    },
+    "started_at": {
+      "minutes_ago": 28
+    }
+  },
+  {
+    "reference": "INC-1012",
+    "application": "PAY",
+    "severity": "P3",
+    "category": "THIRD_PARTY_SERVICE",
+    "title": "Card settlement file upload to card scheme failed",
+    "description": "Batch SETTLEMENT_UPLOAD_VISA failed with an SFTP connection timeout to the card-scheme gateway; retries also failed. Three settlement files are waiting to be sent.",
+    "business_impact": "Settlement with the card scheme is delayed; missing today's cut-off would delay merchant funding.",
+    "created_by": "controlm.alerts",
+    "created_at": {
+      "minutes_ago": 80
+    },
+    "started_at": {
+      "minutes_ago": 90
+    },
+    "history": [
+      {
+        "type": "assign",
+        "after_minutes": 10,
+        "team": "Payments Production Support",
+        "engineer": "m.rossi"
+      }
+    ]
+  },
+  {
+    "reference": "INC-1013",
+    "application": "RDW",
+    "severity": "P3",
+    "category": "DATA_PROCESSING",
+    "title": "Finance dashboard showing stale intraday data",
+    "description": "The intraday finance dashboard has not refreshed for over an hour; the ETL load from reconciliation was skipped.",
+    "business_impact": "Treasury and finance see an out-of-date intraday liquidity position.",
+    "created_by": "m.tanaka",
+    "created_at": {
+      "minutes_ago": 18
+    },
+    "started_at": {
+      "minutes_ago": 25
+    },
+    "history": [
+      {
+        "type": "assign",
+        "after_minutes": 3,
+        "team": "Data Platform Support",
+        "engineer": "m.tanaka"
+      },
+      {
+        "type": "status",
+        "after_minutes": 5,
+        "status": "INVESTIGATING",
+        "note": "Checking upstream feeds"
+      }
+    ]
+  },
+  {
+    "reference": "INC-1014",
+    "application": "REC",
+    "severity": "P4",
+    "category": "DATA_PROCESSING",
+    "title": "Small FX rounding differences in reconciliation report",
+    "description": "37 cross-currency items show differences below 0.01 EUR between the payment extract and the ledger; they are reported as breaks every day.",
+    "business_impact": "Operations spend time clearing false breaks; no financial loss.",
+    "created_by": "j.chen",
+    "created_at": {
+      "minutes_ago": 290
+    },
+    "started_at": {
+      "minutes_ago": 300
+    }
+  },
+  {
+    "reference": "INC-1015",
+    "application": "CUS",
+    "severity": "P3",
+    "category": "THIRD_PARTY_SERVICE",
+    "title": "Account statement PDFs slow to generate",
+    "description": "Statement download takes 25-30 s instead of 3 s; the external PDF rendering vendor reports degraded performance.",
+    "business_impact": "Customers wait or retry statement downloads; no data issue.",
+    "created_by": "l.moreau",
+    "created_at": {
+      "minutes_ago": 390
+    },
+    "started_at": {
+      "minutes_ago": 400
+    },
+    "history": [
+      {
+        "type": "assign",
+        "after_minutes": 10,
+        "team": "Digital Channels Support",
+        "engineer": "l.moreau"
+      },
+      {
+        "type": "status",
+        "after_minutes": 20,
+        "status": "INVESTIGATING"
+      },
+      {
+        "type": "event",
+        "after_minutes": 45,
+        "event_type": "EVIDENCE_ADDED",
+        "actor": "l.moreau",
+        "description": "Vendor status page: PDF rendering API degraded in EU region; ticket VND-7781 raised."
+      },
+      {
+        "type": "status",
+        "after_minutes": 60,
+        "status": "ON_HOLD",
+        "note": "Waiting for vendor ticket VND-7781"
+      }
+    ]
   }
 ]

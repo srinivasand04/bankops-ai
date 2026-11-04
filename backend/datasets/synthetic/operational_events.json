@@ -358,6 +358,33 @@
   },
   {
     "application": "CBS",
+    "event_type": "LOG",
+    "level": "INFO",
+    "source_system": "change-automation",
+    "message": "CHG-2043 partition maintenance completed on ACCOUNT_TXN; 84 partitions dropped",
+    "occurred_at": {
+      "minutes_ago": 238
+    },
+    "attributes": {
+      "change": "CHG-2043"
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "LOG",
+    "level": "WARNING",
+    "source_system": "db-log",
+    "message": "Index IX_TXN_ACCT_DATE status UNUSABLE after partition drop",
+    "occurred_at": {
+      "minutes_ago": 236
+    },
+    "attributes": {
+      "index": "IX_TXN_ACCT_DATE",
+      "status": "UNUSABLE"
+    }
+  },
+  {
+    "application": "CBS",
     "event_type": "METRIC",
     "level": "INFO",
     "source_system": "APM",
@@ -449,6 +476,55 @@
     "event_type": "METRIC",
     "level": "INFO",
     "source_system": "APM",
+    "message": "balance_enquiry_p95_ms=310",
+    "metric_name": "balance_enquiry_p95_ms",
+    "metric_value": 310,
+    "unit": "ms",
+    "occurred_at": {
+      "minutes_ago": 60
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "db-monitor",
+    "message": "db_full_table_scans_per_min=2",
+    "metric_name": "db_full_table_scans_per_min",
+    "metric_value": 2,
+    "unit": "count",
+    "occurred_at": {
+      "minutes_ago": 60
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
+    "message": "balance_enquiry_p95_ms=320",
+    "metric_name": "balance_enquiry_p95_ms",
+    "metric_value": 320,
+    "unit": "ms",
+    "occurred_at": {
+      "minutes_ago": 40
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "LOG",
+    "level": "INFO",
+    "source_system": "channel-gateway",
+    "message": "Online banking morning peak: active sessions 3.1x overnight baseline",
+    "occurred_at": {
+      "minutes_ago": 35
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
     "message": "db_cpu_pct=40%",
     "metric_name": "db_cpu_pct",
     "metric_value": 40,
@@ -468,6 +544,123 @@
     "unit": "ms",
     "occurred_at": {
       "minutes_ago": 30
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
+    "message": "balance_enquiry_p95_ms=900",
+    "metric_name": "balance_enquiry_p95_ms",
+    "metric_value": 900,
+    "unit": "ms",
+    "occurred_at": {
+      "minutes_ago": 30
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "db-monitor",
+    "message": "db_full_table_scans_per_min=5",
+    "metric_name": "db_full_table_scans_per_min",
+    "metric_value": 5,
+    "unit": "count",
+    "occurred_at": {
+      "minutes_ago": 30
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "LOG",
+    "level": "ERROR",
+    "source_system": "app-log",
+    "message": "Balance enquiry exceeded 5 s: full table scan on ACCOUNT_TXN (index IX_TXN_ACCT_DATE unusable)",
+    "occurred_at": {
+      "minutes_ago": 25
+    },
+    "attributes": {
+      "count_last_5m": 160
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "ALERT",
+    "level": "CRITICAL",
+    "source_system": "APM",
+    "message": "Balance enquiry p95 above 5 s on GET /accounts/{id}/balance",
+    "occurred_at": {
+      "minutes_ago": 22
+    },
+    "attributes": {
+      "threshold_s": 5
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "WARNING",
+    "source_system": "APM",
+    "message": "balance_enquiry_p95_ms=4200",
+    "metric_name": "balance_enquiry_p95_ms",
+    "metric_value": 4200,
+    "unit": "ms",
+    "occurred_at": {
+      "minutes_ago": 20
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "db-monitor",
+    "message": "db_full_table_scans_per_min=180",
+    "metric_name": "db_full_table_scans_per_min",
+    "metric_value": 180,
+    "unit": "count",
+    "occurred_at": {
+      "minutes_ago": 20
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "LOG",
+    "level": "ERROR",
+    "source_system": "app-log",
+    "message": "Balance enquiry exceeded 5 s: full table scan on ACCOUNT_TXN (index IX_TXN_ACCT_DATE unusable)",
+    "occurred_at": {
+      "minutes_ago": 12
+    },
+    "attributes": {
+      "count_last_5m": 410
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "CRITICAL",
+    "source_system": "APM",
+    "message": "balance_enquiry_p95_ms=7800",
+    "metric_name": "balance_enquiry_p95_ms",
+    "metric_value": 7800,
+    "unit": "ms",
+    "occurred_at": {
+      "minutes_ago": 10
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "db-monitor",
+    "message": "db_full_table_scans_per_min=240",
+    "metric_name": "db_full_table_scans_per_min",
+    "metric_value": 240,
+    "unit": "count",
+    "occurred_at": {
+      "minutes_ago": 10
     }
   },
   {
@@ -502,6 +695,32 @@
     "level": "INFO",
     "source_system": "health-monitor",
     "message": "core-banking health OK",
+    "occurred_at": {
+      "minutes_ago": 0
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "CRITICAL",
+    "source_system": "APM",
+    "message": "balance_enquiry_p95_ms=8100",
+    "metric_name": "balance_enquiry_p95_ms",
+    "metric_value": 8100,
+    "unit": "ms",
+    "occurred_at": {
+      "minutes_ago": 0
+    }
+  },
+  {
+    "application": "CBS",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "db-monitor",
+    "message": "db_full_table_scans_per_min=250",
+    "metric_name": "db_full_table_scans_per_min",
+    "metric_value": 250,
+    "unit": "count",
     "occurred_at": {
       "minutes_ago": 0
     }
@@ -719,6 +938,85 @@
     "event_type": "METRIC",
     "level": "INFO",
     "source_system": "APM",
+    "message": "statement_pdf_p95_s=3.1",
+    "metric_name": "statement_pdf_p95_s",
+    "metric_value": 3.1,
+    "unit": "s",
+    "occurred_at": {
+      "minutes_ago": 520
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "APM",
+    "message": "statement_pdf_p95_s=27.5",
+    "metric_name": "statement_pdf_p95_s",
+    "metric_value": 27.5,
+    "unit": "s",
+    "occurred_at": {
+      "minutes_ago": 400
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "LOG",
+    "level": "WARNING",
+    "source_system": "app-log",
+    "message": "PDF vendor API responded in 25.4 s (SLA 3 s); vendor status: degraded EU region",
+    "occurred_at": {
+      "minutes_ago": 395
+    },
+    "attributes": {
+      "vendor": "pdf-render",
+      "region": "EU"
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "APM",
+    "message": "statement_pdf_p95_s=29.8",
+    "metric_name": "statement_pdf_p95_s",
+    "metric_value": 29.8,
+    "unit": "s",
+    "occurred_at": {
+      "minutes_ago": 300
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "APM",
+    "message": "statement_pdf_p95_s=28.6",
+    "metric_name": "statement_pdf_p95_s",
+    "metric_value": 28.6,
+    "unit": "s",
+    "occurred_at": {
+      "minutes_ago": 200
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "APM",
+    "message": "statement_pdf_p95_s=27.9",
+    "metric_name": "statement_pdf_p95_s",
+    "metric_value": 27.9,
+    "unit": "s",
+    "occurred_at": {
+      "minutes_ago": 100
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
     "message": "payment_status_timeout_rate_pct=0.5%",
     "metric_name": "payment_status_timeout_rate_pct",
     "metric_value": 0.5,
@@ -752,6 +1050,19 @@
   },
   {
     "application": "CUS",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "APM",
+    "message": "account_summary_timeout_rate_pct=0.4",
+    "metric_name": "account_summary_timeout_rate_pct",
+    "metric_value": 0.4,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 30
+    }
+  },
+  {
+    "application": "CUS",
     "event_type": "ALERT",
     "level": "WARNING",
     "source_system": "APM",
@@ -778,9 +1089,35 @@
     "event_type": "METRIC",
     "level": "ERROR",
     "source_system": "APM",
+    "message": "account_summary_timeout_rate_pct=6.0",
+    "metric_name": "account_summary_timeout_rate_pct",
+    "metric_value": 6.0,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 15
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "APM",
     "message": "payment_status_timeout_rate_pct=15.2%",
     "metric_name": "payment_status_timeout_rate_pct",
     "metric_value": 15.2,
+    "unit": "%",
+    "occurred_at": {
+      "minutes_ago": 0
+    }
+  },
+  {
+    "application": "CUS",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "APM",
+    "message": "account_summary_timeout_rate_pct=11.0",
+    "metric_name": "account_summary_timeout_rate_pct",
+    "metric_value": 11.0,
     "unit": "%",
     "occurred_at": {
       "minutes_ago": 0
@@ -892,6 +1229,37 @@
   },
   {
     "application": "PAY",
+    "event_type": "JOB_RUN",
+    "level": "INFO",
+    "source_system": "Control-M",
+    "message": "SETTLEMENT_UPLOAD_VISA ended OK (3 files sent)",
+    "occurred_at": {
+      "minutes_ago": 1530
+    },
+    "attributes": {
+      "job": "SETTLEMENT_UPLOAD_VISA"
+    }
+  },
+  {
+    "application": "PAY",
+    "event_type": "LOG",
+    "level": "INFO",
+    "source_system": "firewall-manager",
+    "message": "Policy FW-PAY updated by CHG-2044: 3 rules removed (FW-097, FW-112, FW-118 egress to card-scheme gateway)",
+    "occurred_at": {
+      "minutes_ago": 129
+    },
+    "attributes": {
+      "change": "CHG-2044",
+      "removed_rules": [
+        "FW-097",
+        "FW-112",
+        "FW-118"
+      ]
+    }
+  },
+  {
+    "application": "PAY",
     "event_type": "METRIC",
     "level": "INFO",
     "source_system": "APM",
@@ -951,6 +1319,19 @@
     "level": "INFO",
     "source_system": "health-monitor",
     "message": "payment-api health OK (8/8 pods ready)",
+    "occurred_at": {
+      "minutes_ago": 120
+    }
+  },
+  {
+    "application": "PAY",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "Control-M",
+    "message": "settlement_files_pending=0",
+    "metric_name": "settlement_files_pending",
+    "metric_value": 0,
+    "unit": "count",
     "occurred_at": {
       "minutes_ago": 120
     }
@@ -1145,6 +1526,47 @@
     "unit": "tpm",
     "occurred_at": {
       "minutes_ago": 90
+    }
+  },
+  {
+    "application": "PAY",
+    "event_type": "JOB_RUN",
+    "level": "ERROR",
+    "source_system": "Control-M",
+    "message": "SETTLEMENT_UPLOAD_VISA failed: SFTP connect timeout to scheme-gateway 203.0.113.10:22",
+    "occurred_at": {
+      "minutes_ago": 90
+    },
+    "attributes": {
+      "job": "SETTLEMENT_UPLOAD_VISA",
+      "exit_code": 255
+    }
+  },
+  {
+    "application": "PAY",
+    "event_type": "METRIC",
+    "level": "WARNING",
+    "source_system": "Control-M",
+    "message": "settlement_files_pending=1",
+    "metric_name": "settlement_files_pending",
+    "metric_value": 1,
+    "unit": "count",
+    "occurred_at": {
+      "minutes_ago": 90
+    }
+  },
+  {
+    "application": "PAY",
+    "event_type": "LOG",
+    "level": "ERROR",
+    "source_system": "firewall",
+    "message": "Egress DENY payment-batch-01 -> 203.0.113.10:22 (no matching rule)",
+    "occurred_at": {
+      "minutes_ago": 89
+    },
+    "attributes": {
+      "source_host": "payment-batch-01",
+      "destination": "203.0.113.10:22"
     }
   },
   {
@@ -1351,6 +1773,33 @@
   },
   {
     "application": "PAY",
+    "event_type": "JOB_RUN",
+    "level": "ERROR",
+    "source_system": "Control-M",
+    "message": "SETTLEMENT_UPLOAD_VISA retry 1 failed: SFTP connect timeout",
+    "occurred_at": {
+      "minutes_ago": 60
+    },
+    "attributes": {
+      "job": "SETTLEMENT_UPLOAD_VISA",
+      "retry": 1
+    }
+  },
+  {
+    "application": "PAY",
+    "event_type": "METRIC",
+    "level": "WARNING",
+    "source_system": "Control-M",
+    "message": "settlement_files_pending=2",
+    "metric_name": "settlement_files_pending",
+    "metric_value": 2,
+    "unit": "count",
+    "occurred_at": {
+      "minutes_ago": 60
+    }
+  },
+  {
+    "application": "PAY",
     "event_type": "METRIC",
     "level": "CRITICAL",
     "source_system": "APM",
@@ -1541,6 +1990,19 @@
   {
     "application": "PAY",
     "event_type": "METRIC",
+    "level": "WARNING",
+    "source_system": "Control-M",
+    "message": "settlement_files_pending=3",
+    "metric_name": "settlement_files_pending",
+    "metric_value": 3,
+    "unit": "count",
+    "occurred_at": {
+      "minutes_ago": 30
+    }
+  },
+  {
+    "application": "PAY",
+    "event_type": "METRIC",
     "level": "CRITICAL",
     "source_system": "APM",
     "message": "http_5xx_rate_pct=17.9%",
@@ -1718,6 +2180,19 @@
     }
   },
   {
+    "application": "PAY",
+    "event_type": "METRIC",
+    "level": "WARNING",
+    "source_system": "Control-M",
+    "message": "settlement_files_pending=3",
+    "metric_name": "settlement_files_pending",
+    "metric_value": 3,
+    "unit": "count",
+    "occurred_at": {
+      "minutes_ago": 0
+    }
+  },
+  {
     "application": "RDW",
     "event_type": "METRIC",
     "level": "INFO",
@@ -1886,10 +2361,101 @@
   },
   {
     "application": "RDW",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "dw-monitor",
+    "message": "intraday_data_freshness_min=15",
+    "metric_name": "intraday_data_freshness_min",
+    "metric_value": 15,
+    "unit": "min",
+    "occurred_at": {
+      "minutes_ago": 120
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "JOB_RUN",
+    "level": "INFO",
+    "source_system": "scheduler",
+    "message": "ETL_LOAD_RECON completed (feed of the previous cycle)",
+    "occurred_at": {
+      "minutes_ago": 95
+    },
+    "attributes": {
+      "job": "ETL_LOAD_RECON"
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "METRIC",
+    "level": "INFO",
+    "source_system": "dw-monitor",
+    "message": "intraday_data_freshness_min=20",
+    "metric_name": "intraday_data_freshness_min",
+    "metric_value": 20,
+    "unit": "min",
+    "occurred_at": {
+      "minutes_ago": 60
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "METRIC",
+    "level": "WARNING",
+    "source_system": "dw-monitor",
+    "message": "intraday_data_freshness_min=35",
+    "metric_name": "intraday_data_freshness_min",
+    "metric_value": 35,
+    "unit": "min",
+    "occurred_at": {
+      "minutes_ago": 40
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "JOB_RUN",
+    "level": "WARNING",
+    "source_system": "scheduler",
+    "message": "ETL_LOAD_RECON skipped: upstream feed RECON_INTRADAY_PAY not delivered",
+    "occurred_at": {
+      "minutes_ago": 26
+    },
+    "attributes": {
+      "job": "ETL_LOAD_RECON"
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "METRIC",
+    "level": "WARNING",
+    "source_system": "dw-monitor",
+    "message": "intraday_data_freshness_min=55",
+    "metric_name": "intraday_data_freshness_min",
+    "metric_value": 55,
+    "unit": "min",
+    "occurred_at": {
+      "minutes_ago": 20
+    }
+  },
+  {
+    "application": "RDW",
     "event_type": "HEALTH_CHECK",
     "level": "INFO",
     "source_system": "health-monitor",
     "message": "data-warehouse health OK",
+    "occurred_at": {
+      "minutes_ago": 0
+    }
+  },
+  {
+    "application": "RDW",
+    "event_type": "METRIC",
+    "level": "ERROR",
+    "source_system": "dw-monitor",
+    "message": "intraday_data_freshness_min=75",
+    "metric_name": "intraday_data_freshness_min",
+    "metric_value": 75,
+    "unit": "min",
     "occurred_at": {
       "minutes_ago": 0
     }
@@ -1902,6 +2468,20 @@
     "message": "RECON_EOD_PAY ended OK; reconciled feed delivered to warehouse",
     "occurred_at": {
       "minutes_ago": 1530
+    }
+  },
+  {
+    "application": "REC",
+    "event_type": "LOG",
+    "level": "WARNING",
+    "source_system": "batch-log",
+    "message": "FX conversion in payment extract uses HALF_UP rounding; ledger uses HALF_EVEN - 37 differences < 0.01 EUR",
+    "occurred_at": {
+      "minutes_ago": 300
+    },
+    "attributes": {
+      "differences": 37,
+      "max_difference_eur": 0.009
     }
   },
   {

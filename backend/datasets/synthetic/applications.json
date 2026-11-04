@@ -17,7 +17,7 @@
     "business_criticality": "TIER_1",
     "technology_stack": "Core banking package, Oracle Database, IBM MQ",
     "owner_team": "Core Banking Support",
-    "health_status": "HEALTHY"
+    "health_status": "DEGRADED"
   },
   {
     "code": "CUS",
@@ -47,6 +47,6 @@
     "business_criticality": "TIER_3",
     "technology_stack": "SQL data warehouse, ETL pipelines, BI dashboards",
     "owner_team": "Data Platform Support",
-    "health_status": "HEALTHY"
+    "health_status": "DEGRADED"
   }
 ]

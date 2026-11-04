@@ -86,5 +86,41 @@
     "planned_start": {
       "minutes_from_now": 1440
     }
+  },
+  {
+    "change_reference": "CHG-2043",
+    "application": "CBS",
+    "title": "Partition maintenance on ACCOUNT_TXN (archive transactions older than 7 years)",
+    "description": "Drops archived partitions of the account transaction table and rebuilds local indexes.",
+    "change_type": "NORMAL",
+    "status": "IMPLEMENTED",
+    "risk_level": "MEDIUM",
+    "implementer": "d.okafor",
+    "approver": "cab.chair",
+    "rollback_plan": "Rebuild index IX_TXN_ACCT_DATE online (about 20 minutes).",
+    "planned_start": {
+      "minutes_ago": 270
+    },
+    "deployed_at": {
+      "minutes_ago": 240
+    }
+  },
+  {
+    "change_reference": "CHG-2044",
+    "application": "PAY",
+    "title": "Firewall rule clean-up for the payment zone",
+    "description": "Removes unused firewall rules from policy FW-PAY after the quarterly rule review.",
+    "change_type": "STANDARD",
+    "status": "IMPLEMENTED",
+    "risk_level": "LOW",
+    "implementer": "netsec.automation",
+    "approver": "standard-change-catalogue",
+    "rollback_plan": "Restore the previous FW-PAY policy version from the firewall manager.",
+    "planned_start": {
+      "minutes_ago": 140
+    },
+    "deployed_at": {
+      "minutes_ago": 130
+    }
   }
 ]

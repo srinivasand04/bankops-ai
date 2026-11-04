@@ -62,7 +62,7 @@ python -m app.ingestion sources
 python -m app.ingestion reset --yes      # development only: wipes every table
 ```
 
-## Synthetic evidence (149 events, one scenario per application)
+## Synthetic evidence (193 events)
 
 | Incident | Application | Cause in the evidence | Also included so the AI can rule things out |
 |---|---|---|---|
@@ -70,6 +70,13 @@ python -m app.ingestion reset --yes      # development only: wipes every table
 | INC-1003 (P2) | CBS | CHG-2030 lowered the Oracle listener process limit (300 -> 150); ORA-12519 errors after failover | flat DB CPU; payment retries as the downstream symptom |
 | INC-1004 (P2) | CUS | identity-provider key rotation; the SSO library from CHG-2035 caches keys for 24 h, so new tokens fail | healthy Payment and Core Banking metrics |
 | INC-1006 (P3) | RDW | ETL_AGG_DAILY overlaps the liquidity report window; warehouse CPU at 95% | Core Banking healthy, reconciliation feed delivered on time; INC-1005 is the same pattern |
+| INC-1011 (P2, open) | CBS | CHG-2043 partition maintenance left index IX_TXN_ACCT_DATE unusable; full table scans at the morning peak | CHG-2038 OS patching |
+| INC-1012 (P3) | PAY | CHG-2044 firewall clean-up removed rule FW-118 to the card-scheme gateway | release 2.4.1 deployed in the same window |
+| INC-1013 (P3) | RDW | upstream reconciliation feed not delivered (PAY -> REC -> RDW) | earlier ETL performance incidents |
+| INC-1014 (P4) | REC | HALF_UP vs HALF_EVEN rounding | - |
+| INC-1015 (P3, on hold) | CUS | external PDF vendor degraded | - |
+
+The tests use a frozen copy (`backend/tests/data/core`) so this demo dataset can grow without breaking them.
 
 Each scenario has metrics, logs, alerts or job runs in the incident's time window, plus at least one
 nearby change that is not the cause (for example CHG-2038 OS patching).

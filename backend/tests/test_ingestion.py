@@ -144,3 +144,22 @@ def test_operational_event_filters(client, seeded):
         f"/api/operational-events?application_id={apps['PAY']}&metric_name=http_5xx_rate_pct", headers=headers()
     ).json()
     assert len(all_time) > len(series)
+
+
+def test_demo_dataset_is_valid_and_covers_every_application(db):
+    """The live demo dataset (datasets/synthetic) changes over time - check it stays loadable and useful."""
+    from tests.conftest import DEMO_DATASET
+
+    dataset = read_dataset(DEMO_DATASET)
+    report = dry_run(db, dataset)  # schema + references + lifecycle replay, rolled back
+    assert report.counts["incidents"] == len(dataset.incidents)
+    active = {"OPEN", "ASSIGNED", "INVESTIGATING", "ESCALATED", "ON_HOLD", "REOPENED"}
+
+    def final_status(incident):
+        steps = [s.status for s in incident.history if getattr(s, "type", None) == "status"]
+        if steps:
+            return steps[-1]
+        return "ASSIGNED" if any(s.type == "assign" for s in incident.history) else "OPEN"
+
+    apps_with_work = {i.application for i in dataset.incidents if final_status(i) in active}
+    assert apps_with_work == {a.code for a in dataset.applications}  # every app has something to work on
