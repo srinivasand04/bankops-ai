@@ -76,9 +76,26 @@ Tests run against a separate `bankops_test` database (created by `docker/postgre
 migrated with Alembic at the start of the session and truncated between tests. The suite refuses to
 run if `TEST_DATABASE_URL` does not point at a database ending in `_test`.
 
+## Large synthetic dataset (for the ML module)
+
+```powershell
+cd backend
+.\.venv\Scripts\python.exe scripts\generate_synthetic.py --seed 42 --months 12
+.\.venv\Scripts\python.exe -m app.ingestion load datasets/synthetic_large
+```
+
+12 applications, 4,000 incidents, 648 changes, 125K events with designed signal - see
+[documents/synthetic-data.md](documents/synthetic-data.md).
+
+## Deploy to the web (free tiers)
+
+UI on Vercel, API (Docker) on Render, PostgreSQL on Neon, AI on Groq's free tier - step by step in
+[documents/deployment.md](documents/deployment.md). [`render.yaml`](render.yaml) and
+[`frontend/vercel.json`](frontend/vercel.json) hold the platform configuration.
+
 ## AI analysis: Claude or a free local model
 
-`AI_PROVIDER` in `.env` selects the model provider; everything else is identical.
+`AI_PROVIDER` in `.env` selects the model provider (`anthropic`, `ollama` or `groq`); everything else is identical.
 
 - `AI_PROVIDER=ollama` (free): install [Ollama](https://ollama.com), run `ollama pull qwen3:8b`,
   then `docker compose up -d backend`. Slower on a laptop CPU (minutes per analysis).
@@ -141,8 +158,10 @@ BankOps-AI/
 ## Documentation
 
 - [User guide and test flows](documents/user-guide.md)
+- [Deployment (Vercel + Render + Neon + Groq)](documents/deployment.md)
 - [Architecture](documents/architecture.md)
 - [Data ingestion pipeline](documents/data-ingestion.md)
+- [Large synthetic dataset for ML](documents/synthetic-data.md)
 - [AI incident analysis](documents/ai-analysis.md)
 - [Database design](documents/database-design.md)
 - [API documentation](documents/api-documentation.md)

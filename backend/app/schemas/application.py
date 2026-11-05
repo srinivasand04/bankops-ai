@@ -48,6 +48,7 @@ class ChangeRecordOut(OrmModel):
     implementer: str | None
     approver: str | None
     rollback_plan: str | None
+    components_changed: int | None = None
     planned_start: datetime | None
     deployed_at: datetime | None
     data_source: str

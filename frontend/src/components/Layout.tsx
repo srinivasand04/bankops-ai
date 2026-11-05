@@ -1,4 +1,4 @@
-import { Bot, LayoutDashboard, Landmark, ListChecks, UserRound } from "lucide-react";
+import { Bot, LayoutDashboard, Landmark, ListChecks, Network, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 
@@ -8,6 +8,7 @@ const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/incidents", label: "Incidents", icon: ListChecks, end: false },
   { to: "/investigations", label: "AI investigations", icon: Bot, end: false },
+  { to: "/architecture", label: "Architecture", icon: Network, end: false },
 ];
 
 export default function Layout({ identity, onIdentityChange, children }: { identity: Identity; onIdentityChange: (identity: Identity) => void; children: ReactNode }) {
@@ -59,7 +60,7 @@ export default function Layout({ identity, onIdentityChange, children }: { ident
         </header>
         <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
         <footer className="px-4 pb-6 text-center text-xs text-slate-500">
-          Synthetic data only. SLA targets are demonstration values. AI output is advisory and always needs human review.
+          Public demo with synthetic data only - it resets when the server restarts. SLA targets are demonstration values. AI output is advisory and always needs human review.
         </footer>
       </div>
     </div>

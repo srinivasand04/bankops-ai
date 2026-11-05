@@ -9,6 +9,7 @@ from app.ai.llm import LlmClient
 from app.ai.providers import get_llm, provider_status
 from app.ai.schemas import AiStatusOut, AnalyzeRequest, InvestigationOut, ReviewRequest
 from app.api.deps import AnyUser, DbSession, Engineer, Manager
+from app.core.config import get_settings
 from app.models.enums import InvestigationStatus
 
 router = APIRouter(prefix="/api/ai", tags=["AI Analysis"])
@@ -21,9 +22,11 @@ def _out(service: AnalysisService, inv) -> InvestigationOut:
 
 
 @router.get("/status", response_model=AiStatusOut)
-def ai_status(_: AnyUser):
-    """Active provider (AI_PROVIDER), model and whether analysis can run right now."""
-    return AiStatusOut(**provider_status())
+def ai_status(db: DbSession, _: AnyUser):
+    """Active provider (AI_PROVIDER), model, whether analysis can run now, and the daily demo limit."""
+    limit = get_settings().ai_daily_limit or None
+    left = max(limit - AnalysisService(db).runs_today(), 0) if limit else None
+    return AiStatusOut(**provider_status(), daily_limit=limit, runs_left_today=left)
 
 
 @router.get("/incidents/{incident_id}/context")

@@ -6,7 +6,7 @@ for the MVP it holds synthetic records.
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.application import Application
@@ -30,6 +30,8 @@ class ChangeRecord(DataSourceMixin, TimestampMixin, Base):
     implementer: Mapped[str | None] = mapped_column(String(100))
     approver: Mapped[str | None] = mapped_column(String(100))
     rollback_plan: Mapped[str | None] = mapped_column(Text)
+    # Change scope: number of components / services touched (a change-risk feature)
+    components_changed: Mapped[int | None] = mapped_column(Integer)
     planned_start: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     deployed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
 

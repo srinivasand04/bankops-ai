@@ -31,6 +31,13 @@ class PermissionDeniedError(DomainError):
     code = "permission_denied"
 
 
+class RateLimitedError(DomainError):
+    """A usage limit was reached (e.g. the public demo's daily AI analysis cap)."""
+
+    status_code = 429
+    code = "rate_limited"
+
+
 class AiUnavailableError(DomainError):
     """Claude could not be reached or is not configured (credentials, rate limit, network)."""
 

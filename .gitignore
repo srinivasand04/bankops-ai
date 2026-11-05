@@ -34,3 +34,6 @@ data/raw/
 
 # Frontend build info
 frontend/tsconfig.tsbuildinfo
+
+# Large synthetic dataset - regenerate with scripts/generate_synthetic.py (deterministic)
+backend/datasets/synthetic_large/

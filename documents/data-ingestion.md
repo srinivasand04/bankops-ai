@@ -44,6 +44,10 @@ demo data always looks current. History steps use `after_minutes` from the incid
 
 ## Loading rules
 
+- `reuse_applications: true` in the manifest lets a dataset reference applications owned by another source (same code)
+  instead of failing; dependency pairs that already exist are skipped. The large dataset uses this to build on the demo apps.
+- Operational events are streamed with PostgreSQL `COPY` inside the load transaction (125K events in seconds).
+
 - Each source is loaded once (`load` skips an existing source); `--replace` reloads it.
 - Replace deletes that source's incidents and evidence only. Records from other sources stay,
   for example incidents created through the API (`MANUAL`).

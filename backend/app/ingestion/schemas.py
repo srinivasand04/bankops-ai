@@ -81,6 +81,9 @@ class DatasetManifest(Record):
     description: str
     license: str | None = None
     citation: str | None = None
+    # Applications already loaded by another source (same code) are referenced instead of failing.
+    # Lets a larger dataset build on the demo environment without taking ownership of its apps.
+    reuse_applications: bool = False
 
 
 class ApplicationIn(Record):
@@ -115,6 +118,7 @@ class ChangeIn(Record):
     implementer: Name | None = None
     approver: Name | None = None
     rollback_plan: str | None = None
+    components_changed: int | None = Field(default=None, ge=1, le=500)
     planned_start: TimePoint | None = None
     deployed_at: TimePoint | None = None
     external_id: str | None = None

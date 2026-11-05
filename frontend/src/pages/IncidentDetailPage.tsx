@@ -225,6 +225,7 @@ function AiCard({ incidentId, canEdit, investigations, setError }: { incidentId:
       {ai.data && (
         <p className="mb-3 text-xs text-slate-500">
           {ai.data.provider} · {ai.data.model} · {ai.data.ready ? "ready" : <span className="text-red-700">{ai.data.detail}</span>}
+          {ai.data.daily_limit != null && ` · ${ai.data.runs_left_today} runs left today`}
         </p>
       )}
       {canEdit && (

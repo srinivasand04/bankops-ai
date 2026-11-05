@@ -7,6 +7,7 @@
   are replaced. Records from other sources (e.g. incidents created through the API) are untouched.
 """
 
+import json
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -30,7 +31,6 @@ from app.models import (
     OperationalEvent,
 )
 from app.models.enums import ActionStatus, ActionType, EventType, IncidentStatus, RcaStatus, Source
-from app.repositories.incident_repository import IncidentRepository
 from app.services import lifecycle, sla_service
 from app.services.classification import derive_priority
 from app.services.timeline import record_event
@@ -44,6 +44,9 @@ _STATUS_EVENT = {
     IncidentStatus.CLOSED: EventType.CLOSED,
     IncidentStatus.REOPENED: EventType.REOPENED,
 }
+
+
+FLUSH_EVERY = 250  # incidents per database round trip while loading
 
 
 class LoadError(Exception):
@@ -147,7 +150,6 @@ class _Loader:
         self.now = now
         self.apps: dict[str, Application] = {}
         self.changes: dict[str, ChangeRecord] = {}
-        self.references = IncidentRepository(db)
         self.counts = {"applications": 0, "dependencies": 0, "changes": 0, "incidents": 0, "operational_events": 0}
 
     def at(self, value):
@@ -158,9 +160,21 @@ class _Loader:
         self._dependencies()
         self._changes()
         # Oldest first so generated references follow creation order
-        for record in sorted(self.ds.incidents, key=lambda r: self.at(r.created_at)):
+        ordered = sorted(self.ds.incidents, key=lambda r: self.at(r.created_at))
+        self._reserve_references(sum(1 for r in ordered if not r.reference))
+        for n, record in enumerate(ordered, start=1):
             self._incident(record)
+            if n % FLUSH_EVERY == 0:  # one round trip per batch, not per incident
+                self.db.flush()
+        self.db.flush()
         self._operational_events()
+
+    def _reserve_references(self, count: int) -> None:
+        """Take `count` INC- numbers from the sequence in one query instead of one query each."""
+        self._references = iter(
+            self.db.scalars(text("SELECT nextval('incident_reference_seq') FROM generate_series(1, :n)"), {"n": count}).all()
+            if count else []
+        )
 
     # ---- reference data -----------------------------------------------------------------
 
@@ -168,7 +182,12 @@ class _Loader:
         for record in self.ds.applications:
             app = self.db.scalar(select(Application).where(Application.code == record.code))
             if app is not None and app.data_source != self.source:
-                raise LoadError(f"Application code {record.code} already belongs to source {app.data_source}")
+                if not self.ds.manifest.reuse_applications:
+                    raise LoadError(f"Application code {record.code} already belongs to source {app.data_source}")
+                # Reference the existing application as it is; its owning source keeps it.
+                self.apps[record.code] = app
+                self.counts["reused_applications"] = self.counts.get("reused_applications", 0) + 1
+                continue
             if app is None:
                 app = Application(code=record.code)
                 self.db.add(app)
@@ -181,7 +200,12 @@ class _Loader:
         self.db.flush()
 
     def _dependencies(self) -> None:
+        existing = set(self.db.execute(select(ApplicationDependency.application_id, ApplicationDependency.depends_on_id)))
         for record in self.ds.dependencies:
+            pair = (self.apps[record.application].id, self.apps[record.depends_on].id)
+            if pair in existing:  # already declared by another source (shared applications)
+                continue
+            existing.add(pair)
             self.db.add(
                 ApplicationDependency(
                     application=self.apps[record.application],
@@ -213,17 +237,21 @@ class _Loader:
         self.db.flush()
 
     def _operational_events(self) -> None:
-        for record in self.ds.operational_events:
-            values = record.model_dump(exclude={"application", "occurred_at"})
-            self.db.add(
-                OperationalEvent(
-                    **values,
-                    application=self.apps[record.application],
-                    occurred_at=self.at(record.occurred_at),
-                    data_source=self.source,
-                )
-            )
-            self.counts["operational_events"] += 1
+        """Stream events with PostgreSQL COPY: large datasets hold 100K+ rows, and even executemany sends
+        one statement per row (about 2 ms each over Docker networking). COPY runs inside the same
+        transaction, so a failed load (or a dry run) still rolls everything back."""
+        columns = ("application_id", "event_type", "level", "source_system", "message", "metric_name",
+                   "metric_value", "unit", "attributes", "occurred_at", "data_source", "external_id")
+        cursor = self.db.connection().connection.cursor()  # the raw psycopg cursor
+        with cursor.copy(f"COPY {OperationalEvent.__tablename__} ({', '.join(columns)}) FROM STDIN") as copy:
+            for record in self.ds.operational_events:
+                copy.write_row((
+                    self.apps[record.application].id, record.event_type.value, record.level.value, record.source_system,
+                    record.message, record.metric_name, record.metric_value, record.unit,
+                    json.dumps(record.attributes) if record.attributes is not None else None,
+                    self.at(record.occurred_at), self.source, record.external_id,
+                ))
+        self.counts["operational_events"] += len(self.ds.operational_events)
 
     # ---- incidents ----------------------------------------------------------------------
 
@@ -235,7 +263,7 @@ class _Loader:
             return created_at + timedelta(minutes=minutes)
 
         incident = Incident(
-            reference_number=record.reference or self.references.next_reference(),
+            reference_number=record.reference or f"INC-{next(self._references)}",
             external_id=record.external_id,
             data_source=self.source,
             title=record.title,
@@ -245,6 +273,7 @@ class _Loader:
             priority=record.priority or derive_priority(record.severity, app.business_criticality),
             category=record.category,
             status=IncidentStatus.OPEN,
+            reopen_count=0,  # column default applies only at INSERT; histories may reopen before that
             business_impact=record.business_impact,
             created_by=record.created_by,
             started_at=self.at(record.started_at),
@@ -330,7 +359,6 @@ class _Loader:
 
         sla_service.refresh_breach_flags(incident, incident.sla, self.now)
         self.db.add(incident)
-        self.db.flush()
         self.counts["incidents"] += 1
 
     def _transition(self, incident, target, note, actor, when, record: IncidentIn) -> None:

@@ -4,7 +4,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # backend/app/core/config.py -> project root is three levels up from backend/
@@ -46,6 +46,14 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://bankops:bankops@localhost:5445/bankops"
     test_database_url: str | None = None
 
+    @field_validator("database_url", "test_database_url")
+    @classmethod
+    def use_psycopg_driver(cls, value: str | None) -> str | None:
+        """Hosted Postgres (Neon, Render) hands out postgres:// URLs; SQLAlchemy needs the driver name."""
+        if value and value.startswith(("postgres://", "postgresql://")):
+            return "postgresql+psycopg://" + value.split("://", 1)[1]
+        return value
+
     cors_origins: list[str] = ["http://localhost:5173"]
 
     auth_enabled: bool = False
@@ -56,8 +64,20 @@ class Settings(BaseSettings):
     sla_warning_threshold: float = Field(default=0.75, gt=0, lt=1)
 
     # ---- AI provider ----
-    # "anthropic" = Claude API (paid, strongest reasoning); "ollama" = local open model (free, slower)
-    ai_provider: Literal["anthropic", "ollama"] = "anthropic"
+    # "anthropic" = Claude API (paid, strongest reasoning); "ollama" = local open model (free, slower);
+    # "groq" = hosted open model (free tier, fast) - used for the public web demo
+    ai_provider: Literal["anthropic", "ollama", "groq"] = "anthropic"
+    # Public demo guard: maximum AI analyses per UTC day (0 = unlimited)
+    ai_daily_limit: int = Field(default=0, ge=0)
+
+    # ---- Groq (hosted open models, OpenAI-compatible API) ----
+    groq_api_key: str | None = None
+    groq_base_url: str = "https://api.groq.com/openai/v1"
+    groq_model: str = "openai/gpt-oss-120b"
+    # gpt-oss reasoning tokens count against the free tier's ~8K tokens/minute - keep it low
+    groq_reasoning_effort: Literal["low", "medium", "high"] = "low"
+    groq_max_tokens: int = Field(default=4096, ge=512, le=32768)
+    groq_timeout_seconds: float = Field(default=120, gt=0)
 
     # ---- Ollama (local models) ----
     ollama_base_url: str = "http://localhost:11434"

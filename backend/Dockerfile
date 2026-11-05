@@ -20,6 +20,6 @@ USER bankops
 
 EXPOSE 8000
 HEALTHCHECK --interval=15s --timeout=5s --retries=5 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"
+    CMD python -c "import os, urllib.request; urllib.request.urlopen(f'http://localhost:{os.environ.get(\"PORT\", \"8000\")}/api/health')"
 
 ENTRYPOINT ["./docker-entrypoint.sh"]

@@ -39,7 +39,7 @@ Unique pair; CHECK `application_id <> depends_on_id`.
 ### change_records
 `change_reference` (unique, e.g. CHG-2041), `application_id`, `change_type`
 (STANDARD/NORMAL/EMERGENCY), `status`, `risk_level`, `version`, `implementer`, `approver`,
-`rollback_plan`, `planned_start`, `deployed_at` (indexed). Simulated ITSM data for now.
+`rollback_plan`, `components_changed` (change scope, migration 0003), `planned_start`, `deployed_at` (indexed). Simulated ITSM data for now.
 
 ### incidents
 | Column | Notes |

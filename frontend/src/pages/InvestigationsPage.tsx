@@ -72,6 +72,7 @@ export default function InvestigationsPage({ identity }: { identity: Identity })
           {ai.data && (
             <p className={`mt-3 text-xs ${ai.data.ready ? "text-slate-500" : "text-red-700"}`}>
               Model: {ai.data.provider} / {ai.data.model} ({ai.data.cost}) - {ai.data.detail}
+              {ai.data.daily_limit != null && ` · ${ai.data.runs_left_today} of ${ai.data.daily_limit} demo analyses left today`}
             </p>
           )}
           <div className="mt-3"><ErrorBanner message={error} onClose={() => setError(null)} /></div>

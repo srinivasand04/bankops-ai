@@ -9,7 +9,7 @@ import logging
 import re
 from datetime import timedelta
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.ai.compact import compact_context
@@ -17,8 +17,9 @@ from app.ai.context import IncidentContext, build_incident_context
 from app.ai.llm import LlmClient
 from app.ai.prompts.incident_analysis import build_user_message, system_prompt
 from app.ai.schemas import AgentExecutionOut, IncidentAnalysis, InvestigationOut, ReviewRequest
+from app.core.config import get_settings
 from app.core.database import SessionLocal
-from app.core.exceptions import BusinessRuleError, DomainError, NotFoundError
+from app.core.exceptions import BusinessRuleError, DomainError, NotFoundError, RateLimitedError
 from app.core.security import AI_ACTOR_PREFIX, CurrentUser, Role
 from app.models import AgentExecution, Incident, InvestigationReport
 from app.models.enums import AgentExecutionStatus, EventType, InvestigationStatus, RootCauseStatus
@@ -172,6 +173,12 @@ class AnalysisService:
 
     # ---- analysis -----------------------------------------------------------------------
 
+    def runs_today(self) -> int:
+        midnight = utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        return self.db.scalar(
+            select(func.count()).select_from(InvestigationReport).where(InvestigationReport.created_at >= midnight)
+        )
+
     def list_recent(self, status: InvestigationStatus | None = None, limit: int = 50) -> list[InvestigationReport]:
         stmt = select(InvestigationReport).order_by(InvestigationReport.created_at.desc()).limit(limit)
         if status:
@@ -196,6 +203,12 @@ class AnalysisService:
             raise BusinessRuleError(
                 f"INV-{running.id} is already analysing {incident.reference_number}",
                 details={"investigation_id": running.id},
+            )
+        limit = get_settings().ai_daily_limit
+        if limit and self.runs_today() >= limit:
+            raise RateLimitedError(
+                f"The demo allows {limit} AI analyses per day - limit reached, try again tomorrow (UTC)",
+                details={"daily_limit": limit},
             )
         now = utcnow()
         inv = InvestigationReport(

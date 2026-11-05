@@ -45,6 +45,10 @@ services:
       OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-30m}
       OLLAMA_THINK: ${OLLAMA_THINK:-false}
       OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-900}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_MODEL: ${GROQ_MODEL:-openai/gpt-oss-120b}
+      AI_DAILY_LIMIT: ${AI_DAILY_LIMIT:-0}
+      DEMO_RESET_ON_START: ${DEMO_RESET_ON_START:-false}
       SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
     extra_hosts:
       - "host.docker.internal:host-gateway"

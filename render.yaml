@@ -1,0 +1,33 @@
+# Render Blueprint for the BankOps AI backend (free web service, Docker).
+# Database: Neon (free PostgreSQL) - paste its connection string as DATABASE_URL in the Render dashboard.
+# Frontend: deployed separately on Vercel (see frontend/vercel.json and documents/deployment.md).
+services:
+  - type: web
+    name: bankops-ai-api
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: demo
+      - key: DATABASE_URL
+        sync: false # Neon connection string (postgresql://...?sslmode=require)
+      - key: CORS_ORIGINS
+        sync: false # JSON list, e.g. ["https://bankops-ai.vercel.app"]
+      - key: AI_PROVIDER
+        value: groq
+      - key: GROQ_API_KEY
+        sync: false # from console.groq.com
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      - key: AI_DAILY_LIMIT
+        value: "25"
+      - key: DEMO_RESET_ON_START
+        value: "true"
+      - key: SEED_DEMO_DATA
+        value: "true"
+      - key: AUTH_ENABLED
+        value: "false"

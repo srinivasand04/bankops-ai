@@ -136,8 +136,10 @@ class InvestigationOut(BaseModel):
 
 
 class AiStatusOut(BaseModel):
-    provider: Literal["anthropic", "ollama"]
+    provider: Literal["anthropic", "ollama", "groq"]
     model: str
     ready: bool
     detail: str
     cost: str
+    daily_limit: int | None = None
+    runs_left_today: int | None = None

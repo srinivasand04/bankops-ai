@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BankOps AI Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Layout idea: one reading column, two wide diagrams, then scannable talking points. */
+  :root {
+    --paper: #f5f6f3;
+    --surface: #ffffff;
+    --ink: #142235;
+    --muted: #586474;
+    --line: #d6dbe1;
+    --accent: #1d6a85;
+    --human: #2e7d4f;
+    --ai: #a86a12;
+    --font-display: "Archivo", "Segoe UI", system-ui, sans-serif;
+    --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0f1722; --surface: #162233; --ink: #e6ebf1; --muted: #9aa7b6; --line: #2a3a4f;
+      --accent: #5fb3d1; --human: #6cc48f; --ai: #e0a64a; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0f1722; --surface: #162233; --ink: #e6ebf1; --muted: #9aa7b6; --line: #2a3a4f;
+    --accent: #5fb3d1; --human: #6cc48f; --ai: #e0a64a; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.6 var(--font-body); }
+  main { max-width: 1000px; margin: 0 auto; padding: 32px 16px 56px; display: grid; gap: 40px; }
+  h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; text-wrap: balance; margin: 0; }
+  h1 { font-size: clamp(30px, 5vw, 44px); letter-spacing: -0.01em; }
+  h2 { font-size: 22px; margin-bottom: 12px; }
+  h3 { font-size: 16px; }
+  p { margin: 0; max-width: 68ch; }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  code, .mono { font-family: var(--font-mono); font-size: 0.9em; }
+  header { display: grid; gap: 12px; }
+  .tag { font: 500 13px var(--font-mono); color: var(--accent); }
+  .lede { font-size: 18px; color: var(--muted); }
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .fact { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+  .fact b { display: block; font: 700 24px var(--font-display); font-variant-numeric: tabular-nums; }
+  .fact span { color: var(--muted); font-size: 14px; }
+  .pitch { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0; padding: 16px 18px; display: grid; gap: 10px; }
+  .pitch p { font-size: 17px; }
+  .pitch button { justify-self: start; font: 500 14px var(--font-body); color: var(--accent); background: none; border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+  figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  .scroll { overflow-x: auto; }
+  svg { display: block; width: 100%; min-width: 720px; height: auto; color: var(--ink); }
+  figcaption { margin-top: 10px; color: var(--muted); font-size: 14px; max-width: 80ch; }
+  .steps { margin: 0; padding-left: 22px; display: grid; gap: 6px; max-width: 75ch; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; }
+  .card p, .card li { font-size: 15px; color: var(--muted); }
+  .card ul { margin: 0; padding-left: 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font: 600 13px var(--font-body); color: var(--muted); }
+  .pill { display: inline-block; font: 500 12px var(--font-mono); padding: 1px 8px; border-radius: 99px; border: 1px solid currentColor; white-space: nowrap; }
+  .built { color: var(--human); }
+  .next { color: var(--ai); }
+  details { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+  details[open] summary { margin-bottom: 6px; }
+  summary { cursor: pointer; font-weight: 600; }
+  details p { font-size: 15px; color: var(--muted); }
+  .qa { display: grid; gap: 8px; }
+  footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 16px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="tag">Portfolio project · Python · FastAPI · React · LLMs · LangGraph</span>
+    <h1>BankOps AI</h1>
+    <p class="lede">Banking IT incident intelligence: track incidents through a controlled lifecycle, let an AI investigate
+      them from cited evidence, and keep a human in charge of every decision.</p>
+  </header>
+
+  <section aria-labelledby="pitch-h">
+    <h2 id="pitch-h">30-second pitch</h2>
+    <div class="pitch">
+      <p id="pitch-text">When a bank's payment system fails, engineers spend the first hour collecting logs, metrics and
+        recent changes before anyone can say what broke. BankOps AI does that collection automatically: it builds a fact
+        base where every log line, metric and change has an ID, asks a language model for root-cause hypotheses that must
+        cite those IDs, and checks every citation before a human incident manager approves or rejects the result. The AI
+        never confirms a root cause or closes an incident itself, which is how a regulated bank has to work.</p>
+      <button type="button" id="copy">Copy pitch</button>
+    </div>
+  </section>
+
+  <section class="facts" aria-label="Key numbers">
+    <div class="fact"><b>12</b><span>banking applications with a dependency graph</span></div>
+    <div class="fact"><b>4,000+</b><span>incidents of synthetic history, 648 changes</span></div>
+    <div class="fact"><b>125K</b><span>metrics, logs, alerts and job runs as evidence</span></div>
+    <div class="fact"><b>3</b><span>LLM providers behind one interface</span></div>
+    <div class="fact"><b>161</b><span>automated tests, AI mocked (zero tokens)</span></div>
+  </section>
+
+  <section aria-labelledby="arch-h">
+    <h2 id="arch-h">System architecture</h2>
+    <figure>
+      <div class="scroll">
+        <svg viewBox="0 0 960 300" role="img" aria-label="Data flows from datasets through validated ingestion into PostgreSQL, is served by FastAPI services to a React UI, and an AI path builds a cited fact base, calls an LLM provider, checks the answer with guardrails and sends it to a human review queue.">
+          <defs>
+            <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
+          </defs>
+          <g fill="none" stroke="currentColor" stroke-width="1.4">
+            <rect x="10" y="40" width="140" height="70" rx="6"/>
+            <rect x="190" y="40" width="140" height="70" rx="6"/>
+            <rect x="370" y="40" width="150" height="70" rx="6"/>
+            <rect x="575" y="40" width="165" height="70" rx="6"/>
+            <rect x="795" y="40" width="155" height="70" rx="6"/>
+            <rect x="370" y="190" width="150" height="70" rx="6"/>
+            <rect x="575" y="190" width="165" height="70" rx="6"/>
+            <rect x="795" y="190" width="155" height="70" rx="6" stroke="#2e7d4f" stroke-width="2"/>
+          </g>
+          <g font-family="IBM Plex Sans, sans-serif" fill="currentColor" text-anchor="middle">
+            <text x="80" y="70" font-size="14" font-weight="600">Datasets</text>
+            <text x="80" y="90" font-size="12" opacity="0.75">synthetic · real (BPI)</text>
+            <text x="260" y="70" font-size="14" font-weight="600">Ingestion</text>
+            <text x="260" y="90" font-size="12" opacity="0.75">3-layer validation</text>
+            <text x="445" y="70" font-size="14" font-weight="600">PostgreSQL 17</text>
+            <text x="445" y="90" font-size="12" opacity="0.75">incidents · evidence · audit</text>
+            <text x="657" y="70" font-size="14" font-weight="600">FastAPI services</text>
+            <text x="657" y="90" font-size="12" opacity="0.75">lifecycle · SLA · RCA · CAPA</text>
+            <text x="872" y="70" font-size="14" font-weight="600">React UI</text>
+            <text x="872" y="90" font-size="12" opacity="0.75">engineer · manager</text>
+            <text x="445" y="220" font-size="14" font-weight="600">Fact base</text>
+            <text x="445" y="240" font-size="12" opacity="0.75">every item has an ID</text>
+            <text x="657" y="220" font-size="14" font-weight="600">LLM provider</text>
+            <text x="657" y="240" font-size="12" opacity="0.75">Claude · Groq · Ollama</text>
+            <text x="872" y="220" font-size="14" font-weight="600">Guardrails</text>
+            <text x="872" y="240" font-size="12" opacity="0.75">citations · approvals</text>
+          </g>
+          <g stroke="currentColor" stroke-width="1.4" fill="none" marker-end="url(#a1)">
+            <line x1="150" y1="75" x2="186" y2="75"/>
+            <line x1="330" y1="75" x2="366" y2="75"/>
+            <line x1="520" y1="68" x2="571" y2="68"/>
+            <line x1="575" y1="84" x2="524" y2="84"/>
+            <line x1="740" y1="68" x2="791" y2="68"/>
+            <line x1="795" y1="84" x2="744" y2="84"/>
+            <line x1="445" y1="110" x2="445" y2="186"/>
+            <line x1="520" y1="225" x2="571" y2="225"/>
+            <line x1="740" y1="225" x2="791" y2="225"/>
+            <line x1="872" y1="190" x2="872" y2="114" stroke="#2e7d4f"/>
+          </g>
+          <g font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle" opacity="0.8">
+            <text x="168" y="30">JSON</text>
+            <text x="348" y="30">COPY</text>
+            <text x="547" y="30">SQL</text>
+            <text x="767" y="30">REST</text>
+            <text x="475" y="152" text-anchor="start">read</text>
+            <text x="547" y="214">prompt</text>
+            <text x="767" y="214">JSON</text>
+            <text x="884" y="156" text-anchor="start" fill="#2e7d4f">review queue</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>A modular monolith. The top row is the incident platform; the bottom row is the AI path. AI output only reaches
+        the incident after a human approves it in the UI, and even then hypotheses stay unconfirmed until a manager confirms one.</figcaption>
+    </figure>
+  </section>
+
+  <section aria-labelledby="flow-h">
+    <h2 id="flow-h">One incident, end to end</h2>
+    <ol class="steps">
+      <li>Release <code>CHG-2041</code> ships; 30 minutes later monitoring raises <code>INC-1007</code> (P1, Payment Processing).</li>
+      <li>The state machine only allows valid steps (assign, investigate, escalate, resolve); each one is written to an audit timeline, and SLA clocks run against the targets.</li>
+      <li>An engineer clicks <b>Analyse with AI</b>. The backend gathers the incident, its timeline, dependent applications, recent changes and metrics into a fact base with IDs such as <code>EV-33</code> and <code>MS-PAY-http_5xx_rate_pct</code>.</li>
+      <li>The model returns structured JSON: summary, cited facts, ranked hypotheses with confidence, impact and actions. It runs in the background while the page refreshes.</li>
+      <li>Guardrails strip citations that do not exist, demote uncited "facts", and force approval on anything that changes production, such as a rollback.</li>
+      <li>An incident manager approves or rejects it (an engineer's attempt is refused by the API), then confirms the right root cause.</li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="agent-h">
+    <h2 id="agent-h">Agentic AI design <span class="pill next">next phase</span></h2>
+    <figure>
+      <div class="scroll">
+        <svg viewBox="0 0 960 290" role="img" aria-label="A supervisor agent receives the request, routes it to the specialist agents it needs, the reporting agent combines their findings and can send the work back for more evidence, and the final report waits for human review.">
+          <defs>
+            <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
+          </defs>
+          <g fill="none" stroke="currentColor" stroke-width="1.4">
+            <rect x="10" y="140" width="120" height="50" rx="6"/>
+            <rect x="170" y="125" width="150" height="80" rx="6" stroke-width="2"/>
+            <rect x="380" y="40" width="200" height="44" rx="6"/>
+            <rect x="380" y="100" width="200" height="44" rx="6"/>
+            <rect x="380" y="160" width="200" height="44" rx="6"/>
+            <rect x="380" y="220" width="200" height="44" rx="6"/>
+            <rect x="640" y="135" width="140" height="60" rx="6"/>
+            <rect x="820" y="135" width="130" height="60" rx="6" stroke="#2e7d4f" stroke-width="2"/>
+          </g>
+          <g font-family="IBM Plex Sans, sans-serif" fill="currentColor" text-anchor="middle">
+            <text x="70" y="170" font-size="14" font-weight="600">Request</text>
+            <text x="245" y="160" font-size="14" font-weight="600">Supervisor</text>
+            <text x="245" y="180" font-size="12" opacity="0.75">picks the agents</text>
+            <text x="480" y="67" font-size="13">Operations monitoring</text>
+            <text x="480" y="127" font-size="13">Incident investigation</text>
+            <text x="480" y="187" font-size="13">Change risk</text>
+            <text x="480" y="247" font-size="13">Risk assessment</text>
+            <text x="710" y="162" font-size="14" font-weight="600">Reporting</text>
+            <text x="710" y="181" font-size="12" opacity="0.75">cited report</text>
+            <text x="885" y="162" font-size="14" font-weight="600" fill="#2e7d4f">Human review</text>
+            <text x="885" y="181" font-size="12" opacity="0.75">approve · reject</text>
+          </g>
+          <g stroke="currentColor" stroke-width="1.4" fill="none">
+            <line x1="130" y1="165" x2="166" y2="165" marker-end="url(#a2)"/>
+            <line x1="320" y1="165" x2="376" y2="62" marker-end="url(#a2)"/>
+            <line x1="320" y1="165" x2="376" y2="122" marker-end="url(#a2)"/>
+            <line x1="320" y1="165" x2="376" y2="182" marker-end="url(#a2)"/>
+            <line x1="320" y1="165" x2="376" y2="242" marker-end="url(#a2)"/>
+            <line x1="580" y1="62" x2="636" y2="160" marker-end="url(#a2)"/>
+            <line x1="580" y1="122" x2="636" y2="162" marker-end="url(#a2)"/>
+            <line x1="580" y1="182" x2="636" y2="168" marker-end="url(#a2)"/>
+            <line x1="580" y1="242" x2="636" y2="172" marker-end="url(#a2)"/>
+            <line x1="780" y1="165" x2="816" y2="165" marker-end="url(#a2)"/>
+            <path d="M710 135 V18 H245 V121" stroke-dasharray="5 4" marker-end="url(#a2)"/>
+          </g>
+          <text x="478" y="12" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle" opacity="0.8">more evidence needed</text>
+        </svg>
+      </div>
+      <figcaption>Planned as a LangGraph state graph with conditional routing: the supervisor sends a request only to the agents it
+        needs, specialists read data through tools (never invented), and the graph pauses for human review before anything is applied.
+        It reuses today's fact base, guardrails and review flow.</figcaption>
+    </figure>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Agent</th><th>Job</th><th>Tools over the database</th></tr></thead>
+        <tbody>
+          <tr><td>Supervisor</td><td>understands the request, routes it, checks the evidence is enough</td><td>-</td></tr>
+          <tr><td>Operations monitoring</td><td>health, affected services, dependencies</td><td><code>get_application_health</code>, <code>get_application_dependencies</code></td></tr>
+          <tr><td>Incident investigation</td><td>timeline, logs, possible causes, missing evidence</td><td><code>get_incident_details</code>, <code>get_incident_timeline</code></td></tr>
+          <tr><td>Change risk</td><td>deployments near the incident, suspicious changes</td><td><code>get_related_changes</code>, <code>get_recent_deployments</code></td></tr>
+          <tr><td>Risk assessment</td><td>business impact, operational-risk exposure, KRIs</td><td><code>calculate_incident_impact</code>, <code>calculate_operational_risk</code></td></tr>
+          <tr><td>Reporting</td><td>one report that separates facts from hypotheses</td><td><code>create_investigation_report</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="trust-h">
+    <h2 id="trust-h">How the AI is kept honest</h2>
+    <div class="grid2">
+      <div class="card"><h3>Evidence first</h3><p>The model only sees a fact base from the database. Every claimed fact must cite an ID that exists; others are removed and listed.</p></div>
+      <div class="card"><h3>Hypotheses, not answers</h3><p>AI root causes are always stored as hypotheses. A database constraint and the API make confirmation a human-only step.</p></div>
+      <div class="card"><h3>Recommend, never act</h3><p>Rollbacks, restarts and config changes are forced to "needs approval". The AI identity cannot close incidents or approve its own work.</p></div>
+      <div class="card"><h3>Reviewed and audited</h3><p>Every step is on an append-only timeline marked HUMAN, AI or SYSTEM. Rejected analyses change nothing.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stack-h">
+    <h2 id="stack-h">Tech stack</h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Layer</th><th>Technology</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>API</td><td>Python 3.12, FastAPI, Pydantic v2</td><td>typed contracts, validation, automatic Swagger docs</td></tr>
+          <tr><td>Data</td><td>PostgreSQL 17 + pgvector, SQLAlchemy 2, Alembic</td><td>constraints enforce the rules; migrations for every schema change</td></tr>
+          <tr><td>AI</td><td>Anthropic SDK (Claude), Groq, Ollama (qwen3)</td><td>one <code>LlmClient</code> interface: quality, cost and data privacy are a config switch</td></tr>
+          <tr><td>Agents</td><td>LangGraph, LangChain tools</td><td>supervisor routing, tool calls, human-in-the-loop interrupts</td></tr>
+          <tr><td>UI</td><td>React, TypeScript, Vite, Tailwind</td><td>workflow screens, live progress, role-aware buttons</td></tr>
+          <tr><td>Quality</td><td>pytest (161 tests), Docker Compose</td><td>real PostgreSQL in tests, AI mocked, deterministic datasets</td></tr>
+          <tr><td>ML (next)</td><td>scikit-learn, XGBoost, LightGBM, statsmodels</td><td>SLA-breach, MTTR, change risk, text routing, clustering, forecasting</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="status-h">
+    <h2 id="status-h">Status</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3><span class="pill built">built</span></h3>
+        <ul>
+          <li>Incident lifecycle, SLA engine, RCA, CAPA, analytics</li>
+          <li>Validated data ingestion; 12-app synthetic history with designed patterns</li>
+          <li>AI analysis with citations, guardrails, background runs and human review</li>
+          <li>Workflow UI with role switching; cloud deployment configuration</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="pill next">next</span></h3>
+        <ul>
+          <li>LangGraph supervisor and five specialist agents</li>
+          <li>ML module: seven classic algorithms compared on real tasks</li>
+          <li>Real Rabobank BPI 2014 incident data adapter</li>
+          <li>Public demo on Vercel, Render and Neon</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="deploy-h">
+    <h2 id="deploy-h">Deploy it online for free</h2>
+    <figure>
+      <div class="scroll">
+        <svg viewBox="0 0 960 150" role="img" aria-label="A visitor's browser loads the UI from Vercel, which calls the API on Render; the API stores data in Neon PostgreSQL and asks Groq for AI analysis.">
+          <defs>
+            <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
+          </defs>
+          <g fill="none" stroke="currentColor" stroke-width="1.4">
+            <rect x="10" y="45" width="140" height="60" rx="6"/>
+            <rect x="210" y="45" width="170" height="60" rx="6"/>
+            <rect x="450" y="45" width="190" height="60" rx="6" stroke-width="2"/>
+            <rect x="720" y="10" width="230" height="54" rx="6"/>
+            <rect x="720" y="86" width="230" height="54" rx="6"/>
+          </g>
+          <g font-family="IBM Plex Sans, sans-serif" fill="currentColor" text-anchor="middle">
+            <text x="80" y="80" font-size="14" font-weight="600">Browser</text>
+            <text x="295" y="72" font-size="14" font-weight="600">Vercel</text>
+            <text x="295" y="91" font-size="12" opacity="0.75">React UI (static)</text>
+            <text x="545" y="72" font-size="14" font-weight="600">Render</text>
+            <text x="545" y="91" font-size="12" opacity="0.75">FastAPI in Docker</text>
+            <text x="835" y="34" font-size="14" font-weight="600">Neon</text>
+            <text x="835" y="52" font-size="12" opacity="0.75">PostgreSQL</text>
+            <text x="835" y="110" font-size="14" font-weight="600">Groq</text>
+            <text x="835" y="128" font-size="12" opacity="0.75">gpt-oss-120b (AI)</text>
+          </g>
+          <g stroke="currentColor" stroke-width="1.4" fill="none" marker-end="url(#a3)">
+            <line x1="150" y1="75" x2="206" y2="75"/>
+            <line x1="380" y1="75" x2="446" y2="75"/>
+            <line x1="640" y1="65" x2="716" y2="40"/>
+            <line x1="640" y1="85" x2="716" y2="110"/>
+          </g>
+          <g font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle" opacity="0.8">
+            <text x="178" y="66">HTTPS</text>
+            <text x="413" y="66">/api</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>All four services have free tiers and sign in with GitHub. The free API sleeps after about 15 minutes idle;
+        the UI shows "waking up" and the demo data resets on each start.</figcaption>
+    </figure>
+    <ol class="steps">
+      <li>Push the code: <code>git add -A</code>, <code>git commit -m "Deploy config"</code>, <code>git push</code>.</li>
+      <li><b>Groq</b> (console.groq.com): create an API key.</li>
+      <li><b>Neon</b> (neon.tech): new project, copy the connection string.</li>
+      <li><b>Render</b> (render.com): New &rarr; Blueprint &rarr; pick the repo (it reads <code>render.yaml</code>); paste
+        <code>DATABASE_URL</code>, <code>GROQ_API_KEY</code> and <code>CORS_ORIGINS</code> = <code>["*"]</code> for now.</li>
+      <li><b>Vercel</b> (vercel.com): Add New &rarr; Project &rarr; the repo, root folder <code>frontend</code>, variable
+        <code>VITE_API_BASE_URL</code> = <code>https://bankops-ai-api.onrender.com/api</code>.</li>
+      <li>Put the Vercel address in Render's <code>CORS_ORIGINS</code>, e.g. <code>["https://bankops-ai.vercel.app"]</code>.</li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="qa-h" class="qa">
+    <h2 id="qa-h">Questions you may get</h2>
+    <details><summary>How do you stop the model from hallucinating?</summary><p>It only sees database facts with IDs, and must cite them. The backend checks every citation; anything uncited is moved out of "facts". Root causes stay hypotheses until a human confirms one.</p></details>
+    <details><summary>Did the AI ever get it wrong?</summary><p>Yes. A small local model blamed a healthy Core Banking system for a reporting delay, although its metrics were flat. The reviewer rejected it, which is exactly why the human step exists. On four test incidents it was right three times.</p></details>
+    <details><summary>Why three LLM providers?</summary><p>Claude gives the best reasoning, Groq is free and fast for a public demo, and Ollama keeps data on the machine, which matters for banks. Switching is one setting because everything uses one interface.</p></details>
+    <details><summary>How do you test AI features without paying for tokens?</summary><p>The LLM is a dependency, so tests swap in a fake that returns a deliberately imperfect answer and check each guardrail. A mocked SDK checks the exact request. 161 tests run in under a minute.</p></details>
+    <details><summary>Why not let the AI roll back a bad release?</summary><p>Bank change management requires an authorised human, often an emergency CAB. The AI recommends and explains; the API refuses consequential actions from an AI identity.</p></details>
+  </section>
+
+  <footer>
+    Code: <a href="https://github.com/Srinivasand04/bankops-ai">github.com/Srinivasand04/bankops-ai</a> ·
+    all data is synthetic · SLA targets are demonstration values
+  </footer>
+</main>
+<script>
+  document.getElementById("copy").addEventListener("click", async (e) => {
+    try {
+      await navigator.clipboard.writeText(document.getElementById("pitch-text").innerText.trim());
+      e.target.textContent = "Copied";
+    } catch {
+      e.target.textContent = "Select the text above to copy";
+    }
+  });
+</script>
+</body>
+</html>

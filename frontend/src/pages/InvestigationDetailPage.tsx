@@ -60,7 +60,7 @@ function Running({ startedAt }: { startedAt: string }) {
       <Loader2 size={20} className="animate-spin" aria-hidden="true" />
       <div>
         <p className="font-medium">The AI is analysing the incident… {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, "0")}</p>
-        <p className="text-blue-800">A local model takes about 5-12 minutes; Claude under a minute. This page refreshes by itself.</p>
+        <p className="text-blue-800">Hosted models (Groq, Claude) take under a minute; a local model 5-12 minutes. This page refreshes by itself.</p>
       </div>
     </div>
   );

@@ -29,6 +29,8 @@ os.environ.update({
     "OLLAMA_COMPACT": "true",
     "OLLAMA_KEEP_ALIVE": "30m",
     "OLLAMA_THINK": "false",
+    "GROQ_API_KEY": "",
+    "AI_DAILY_LIMIT": "0",
 })
 get_settings.cache_clear()
 

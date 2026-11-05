@@ -4,6 +4,7 @@ from functools import lru_cache
 
 import anthropic
 
+from app.ai.groq import GroqLlm
 from app.ai.llm import AnthropicLlm, LlmClient
 from app.ai.ollama import OllamaLlm
 from app.core.config import get_settings
@@ -20,10 +21,18 @@ def _ollama() -> OllamaLlm:
     return OllamaLlm(get_settings())
 
 
+@lru_cache
+def _groq() -> GroqLlm:
+    return GroqLlm(get_settings())
+
+
 def get_llm() -> LlmClient:
     """FastAPI dependency; tests override it with a fake."""
-    if get_settings().ai_provider == "ollama":
+    provider = get_settings().ai_provider
+    if provider == "ollama":
         return _ollama()
+    if provider == "groq":
+        return _groq()
     try:
         return _anthropic()
     except anthropic.AnthropicError as exc:
@@ -36,6 +45,11 @@ def provider_status() -> dict:
         ready, detail = _ollama().status()
         return {"provider": "ollama", "model": s.ollama_model, "ready": ready, "detail": detail,
                 "cost": "free (runs locally)"}
+    if s.ai_provider == "groq":
+        configured = bool(s.groq_api_key)
+        return {"provider": "groq", "model": s.groq_model, "ready": configured,
+                "detail": f"reasoning={s.groq_reasoning_effort}" if configured else "GROQ_API_KEY not set",
+                "cost": "free tier (hosted)"}
     configured = bool(s.anthropic_api_key)
     return {
         "provider": "anthropic",

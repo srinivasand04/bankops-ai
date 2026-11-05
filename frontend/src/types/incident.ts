@@ -230,9 +230,11 @@ export interface Investigation {
 }
 
 export interface AiStatus {
-  provider: "anthropic" | "ollama";
+  provider: "anthropic" | "ollama" | "groq";
   model: string;
   ready: boolean;
   detail: string;
   cost: string;
+  daily_limit: number | null;
+  runs_left_today: number | null;
 }
