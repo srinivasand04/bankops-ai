@@ -3,6 +3,7 @@ import axios from "axios";
 import type {
   AiStatus,
   Application,
+  ApplicationDetail,
   CapaAction,
   Incident,
   IncidentDetail,
@@ -73,6 +74,7 @@ export const incidentApi = {
 
 export const referenceApi = {
   applications: () => data(api.get<Application[]>("/applications")),
+  application: (id: number) => data(api.get<ApplicationDetail>(`/applications/${id}`)),
   referenceData: () => data(api.get<ReferenceData>("/reference-data")),
 };
 

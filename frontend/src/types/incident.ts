@@ -49,6 +49,11 @@ export interface Application extends ApplicationRef {
   health_status: "HEALTHY" | "DEGRADED" | "DOWN" | "UNKNOWN";
 }
 
+export interface ApplicationDetail extends Application {
+  dependencies: { id: number; depends_on: ApplicationRef; dependency_type: string; description: string | null; is_critical: boolean }[];
+  dependents: ApplicationRef[];
+}
+
 export interface Incident {
   id: number;
   reference_number: string;

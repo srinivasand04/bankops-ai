@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BankOps AI Infographic</title>
+<style>
+  :root { --ink:#13224a; --muted:#5b6785; --bg:#fbfaf6; --line:#c9cfdd; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { background:#e9e7e0; }
+  body { font-family:"Segoe UI", system-ui, -apple-system, Arial, sans-serif; color:var(--ink); }
+  #stage { position:relative; width:1080px; height:1350px; background:var(--bg); overflow:hidden; margin:0 auto; }
+  /* subtle grid */
+  #stage::before { content:""; position:absolute; inset:0; background-image:radial-gradient(#e3e1d8 1.2px, transparent 1.2px); background-size:26px 26px; opacity:.7; }
+
+  header { position:absolute; left:0; right:0; top:24px; text-align:center; }
+  .kicker { font-size:19px; letter-spacing:.28em; font-weight:700; color:#2f6fd6; }
+  h1 { font-size:66px; line-height:1; font-weight:900; letter-spacing:.01em; margin-top:10px; }
+  h1 span { color:#d23f6a; }
+  .sub { font-size:22px; color:var(--muted); margin-top:8px; font-weight:500; }
+
+  svg#wires { position:absolute; inset:0; }
+  .wire { fill:none; stroke-width:13; stroke-linecap:round; opacity:.32; }
+  .dots { stroke:#33406b; stroke-width:3; stroke-dasharray:2 7; stroke-linecap:round; fill:none; }
+
+  .hub { position:absolute; width:176px; height:176px; border-radius:50%; background:#fff; border:7px solid #13224a;
+         display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 10px 30px rgba(19,34,74,.18); }
+  .hub b { font-size:23px; font-weight:900; margin-top:4px; }
+  .hub small { font-size:14px; color:var(--muted); font-weight:600; }
+
+  .bubble { position:absolute; width:86px; height:86px; border-radius:50%; color:#fff; display:flex; align-items:center;
+            justify-content:center; text-align:center; font-weight:800; font-size:15px; line-height:1.1; padding:6px;
+            box-shadow:0 6px 16px rgba(0,0,0,.14); }
+  .bubble.next { border:4px dashed rgba(255,255,255,.85); }
+  .legend { margin-top:8px; font-size:15px; font-weight:600; color:var(--muted); }
+  .legend b { display:inline-block; width:13px; height:13px; border-radius:50%; vertical-align:-1px; margin:0 5px 0 14px; background:#13224a; }
+  .legend b.d { background:none; border:2.5px dashed #db2777; }
+  .tag { position:absolute; font-size:11.5px; font-weight:800; letter-spacing:.08em; padding:2px 7px; border-radius:20px; background:#fff; }
+
+  .chip { position:absolute; width:124px; height:64px; background:#fff; border-radius:12px; border:1.5px solid #e1e4ec;
+          display:flex; align-items:center; gap:7px; padding:0 8px; box-shadow:0 2px 6px rgba(19,34,74,.07); }
+  .chip i { flex:none; width:22px; height:22px; border-radius:6px; color:#fff; font-style:normal; font-size:12px; font-weight:800;
+            display:flex; align-items:center; justify-content:center; }
+  .chip span { font-size:13.5px; font-weight:650; line-height:1.15; }
+
+  .kpis { position:absolute; left:40px; right:40px; top:1182px; height:94px; background:#13224a; border-radius:18px;
+          display:grid; grid-template-columns:repeat(5,1fr); color:#fff; align-items:center; text-align:center; }
+  .kpis div b { display:block; font-size:36px; font-weight:900; }
+  .kpis div span { font-size:15px; color:#b9c4e4; font-weight:600; }
+  .foot { position:absolute; left:40px; right:40px; top:1290px; display:flex; justify-content:space-between; align-items:center;
+          font-size:18px; color:var(--muted); font-weight:600; }
+  .foot .motto { color:#d23f6a; font-weight:900; font-size:22px; }
+
+  /* animations (seekable) */
+  @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } }
+  @keyframes pop { 0% { opacity:0; transform:scale(.3); } 70% { opacity:1; transform:scale(1.08); } 100% { opacity:1; transform:scale(1); } }
+  @keyframes draw { from { opacity:0; } 12% { opacity:.32; } to { stroke-dashoffset:0; opacity:.32; } }
+  @keyframes glow { 0%,100% { box-shadow:0 10px 30px rgba(19,34,74,.18); } 50% { box-shadow:0 0 0 18px rgba(210,63,106,.12), 0 10px 30px rgba(19,34,74,.18); } }
+  .a { opacity:0; animation-fill-mode:both; animation-timing-function:cubic-bezier(.2,.7,.2,1); }
+  .fadeUp { animation-name:fadeUp; animation-duration:.6s; }
+  .pop { animation-name:pop; animation-duration:.55s; }
+  .wire, .dots { animation:draw .6s ease-out both; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <header>
+    <div class="kicker a fadeUp" style="animation-delay:0s">AI + ML FOR BANKING PRODUCTION SUPPORT</div>
+    <h1 class="a fadeUp" style="animation-delay:.15s">BANKOPS <span>AI</span></h1>
+    <div class="sub a fadeUp" style="animation-delay:.3s">IT incident intelligence &amp; operational risk platform — architecture</div>
+    <div class="legend a fadeUp" style="animation-delay:.45s"><b></b>built &amp; live <b class="d"></b>next phase</div>
+  </header>
+  <svg id="wires" width="1080" height="1350"></svg>
+</div>
+
+<script>
+const ROWS = [
+  { name:"Data\ningestion", color:"#2f6fd6", chips:["Synthetic bank data","3-layer validation","PostgreSQL 17","pgvector","125K events · COPY"] },
+  { name:"Incident\ncore", color:"#13224a", chips:["Lifecycle state machine","Severity × tier priority","Audit timeline","Change correlation","Role-based access"] },
+  { name:"SLA &\nmetrics", color:"#0f9488", chips:["MTTA","MTTR","SLA breach alerts","Repeat incidents","Trend analytics"] },
+  { name:"RCA &\nCAPA", color:"#d98a0b", chips:["Root-cause hypotheses","Human confirm / reject","Corrective actions","Preventive actions","Evidence links"] },
+  { name:"GenAI\nanalysis", color:"#7c3aed", chips:["Claude Opus 5.5","Groq gpt-oss-120b","Ollama qwen3","Structured JSON output","Cited fact base"] },
+  { name:"Guard-\nrails", color:"#d23f6a", chips:["Cite or demote","Confidence clamp","Human approval gate","No auto-deploy or rollback","Daily AI limit"] },
+  { name:"Risk\nsignals", color:"#c2410c", chips:["Change & release risk","Dependency impact","Business tier","SLA breach risk","Repeat-incident risk"] },
+  { name:"Agentic\nAI", color:"#db2777", next:true, chips:["LangGraph supervisor","5 specialist agents","Tool calling","Shared evidence","Human review step"] },
+  { name:"ML\nlab", color:"#16a34a", next:true, chips:["Linear / logistic regression","Random forest","Gradient boosting","SVM · KNN · K-Means","Time-series forecast"] },
+  { name:"Cloud\ndelivery", color:"#475569", chips:["FastAPI + SQLAlchemy","React + TypeScript","Docker","Vercel + Render","Neon Postgres"] },
+];
+
+const stage = document.getElementById("stage"), svg = document.getElementById("wires");
+const NS = "http://www.w3.org/2000/svg";
+const top0 = 262, step = 94, n = ROWS.length, mid = (n - 1) / 2;
+const hubX = 104, hubY = top0 + mid * step;
+const T0 = 1.0, ROW_GAP = .78;
+
+function el(tag, cls, html, style) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (style) e.style.cssText = style; stage.appendChild(e); return e; }
+
+// hub
+const hub = el("div", "hub a pop", `<svg width="54" height="50" viewBox="0 0 24 22" fill="#13224a"><path d="M12 0 1 5.5V8h22V5.5zM3 9.5h3v8H3zm5 0h3v8H8zm5 0h3v8h-3zm5 0h3v8h-3zM1 19h22v3H1z"/></svg><b>BankOps AI</b><small>modular monolith</small>`,
+  `left:${hubX-88}px; top:${hubY-88}px; animation-delay:.55s;`);
+
+ROWS.forEach((r, i) => {
+  const y = top0 + i * step, start = T0 + i * ROW_GAP;
+  const bx = 262 + 46 * (1 - Math.abs(i - mid) / mid);        // gentle fan, like a tree
+  // curved wire hub -> bubble
+  const p = document.createElementNS(NS, "path");
+  const d = `M ${hubX + 80} ${hubY} C ${hubX + 150} ${hubY}, ${bx - 120} ${y}, ${bx - 43} ${y}`;
+  p.setAttribute("d", d); p.setAttribute("class", "wire"); p.setAttribute("stroke", r.color);
+  svg.appendChild(p); const L = p.getTotalLength();
+  p.style.strokeDasharray = L; p.style.strokeDashoffset = L; p.style.animationDelay = start + "s";
+  // dotted rail above chips
+  const cx0 = bx + 66, railY = y - 40;
+  const rail = document.createElementNS(NS, "path");
+  let rd = `M ${bx + 30} ${y - 34} Q ${bx + 44} ${railY} ${cx0} ${railY} L ${cx0 + 4 * 134 + 62} ${railY}`;
+  for (let k = 0; k < 5; k++) rd += ` M ${cx0 + k * 134 + 62} ${railY} L ${cx0 + k * 134 + 62} ${railY + 9}`;
+  rail.setAttribute("d", rd); rail.setAttribute("class", "dots");
+  svg.appendChild(rail); rail.style.strokeDasharray = "2 7"; rail.style.animation = "none"; rail.style.opacity = 0;
+  rail.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, delay: (start + .45) * 1000, fill: "both" });
+
+  const b = el("div", "bubble a pop" + (r.next ? " next" : ""), r.name.replace("\n", "<br>"),
+    `left:${bx - 43}px; top:${y - 43}px; background:${r.color}; animation-delay:${start + .35}s;`);
+
+  r.chips.forEach((c, k) => {
+    el("div", "chip a fadeUp", `<i style="background:${r.color}">${c.replace(/[^A-Za-z0-9]/g, "").charAt(0)}</i><span>${c}</span>`,
+      `left:${cx0 + k * 134}px; top:${y - 29}px; animation-delay:${start + .5 + k * .07}s;`);
+  });
+});
+
+const KPI_T = T0 + n * ROW_GAP + .3;
+const kpis = el("div", "kpis a fadeUp", [
+  ["12", "applications"], ["4000", "incidents"], ["648", "changes"], ["125000", "events"], ["161", "automated tests"],
+].map(([v, l]) => `<div><b data-to="${v}">0</b><span>${l}</span></div>`).join(""), `animation-delay:${KPI_T}s;`);
+el("div", "foot a fadeUp", `<span>bankops-ai-murex.vercel.app</span><span class="motto">AI suggests · humans decide</span><span>github.com/srinivasand04/bankops-ai</span>`,
+  `animation-delay:${KPI_T + .9}s;`);
+const hubGlow = hub.animate([{ boxShadow: "0 10px 30px rgba(19,34,74,.18)" }, { boxShadow: "0 0 0 22px rgba(210,63,106,.14), 0 10px 30px rgba(19,34,74,.18)" }, { boxShadow: "0 10px 30px rgba(19,34,74,.18)" }],
+  { duration: 1400, delay: (KPI_T + 1.3) * 1000, iterations: 3 });
+
+const fmt = v => v >= 1000 ? (v >= 100000 ? Math.round(v / 1000) + "K" : v.toLocaleString("en-US")) : String(v);
+window.DURATION = KPI_T + 1.3 + 4.4;   // total seconds, then loop
+
+// Deterministic seek: used both for live preview and frame-by-frame recording.
+window.seek = function (t) {
+  document.getAnimations().forEach(a => { a.pause(); a.currentTime = t * 1000; });
+  const k = Math.min(1, Math.max(0, (t - KPI_T) / 1.2)), e = 1 - Math.pow(1 - k, 3);
+  kpis.querySelectorAll("b").forEach(b => { const to = +b.dataset.to; b.textContent = fmt(Math.round(to * e)); });
+};
+if (!/record/.test(location.search)) {
+  const t0 = performance.now();
+  (function loop(now) { seek(((now - t0) / 1000) % window.DURATION); requestAnimationFrame(loop); })(t0);
+} else { seek(0); }
+</script>
+</body>
+</html>

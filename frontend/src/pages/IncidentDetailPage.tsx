@@ -2,6 +2,7 @@ import { ArrowLeft, Bot, Check, X } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
+import CorrelationCard from "../components/CorrelationCard";
 import { InvestigationBadge, PriorityBadge, SeverityBadge, SlaBadge, SourceBadge, StatusBadge } from "../components/Badges";
 import { Button, Card, Empty, ErrorBanner, Field, formatTime, inputClass, minutesLabel, timeAgo } from "../components/ui";
 import { useApi } from "../hooks/useApi";
@@ -81,6 +82,7 @@ export default function IncidentDetailPage({ identity }: { identity: Identity })
             {i.resolution_summary && <p className="mt-3 text-sm"><b className="font-medium">Resolution:</b> {i.resolution_summary}</p>}
           </Card>
 
+          <CorrelationCard incident={i} rca={rca.data} />
           <RootCauseCard roots={rca.data} identity={identity} act={act} />
           <CapaCard actions={[...(rca.data?.corrective_actions ?? []), ...(rca.data?.preventive_actions ?? [])]} canEdit={canEdit} act={act} />
 
