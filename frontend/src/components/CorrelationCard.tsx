@@ -2,6 +2,7 @@ import { ArrowDownRight, ArrowUpRight, GitCommitHorizontal, Network } from "luci
 import { Link } from "react-router-dom";
 
 import { useApi } from "../hooks/useApi";
+import { useI18n } from "../i18n";
 import { incidentApi, referenceApi } from "../services/api";
 import type { ApplicationRef, Incident, IncidentDetail, Rca } from "../types/incident";
 import { SeverityBadge, StatusBadge } from "./Badges";
@@ -16,6 +17,7 @@ type Related = { app: ApplicationRef; direction: "downstream" | "upstream"; crit
  * connected applications have active incidents right now. Read-only - humans decide what is causal.
  */
 export default function CorrelationCard({ incident, rca }: { incident: IncidentDetail; rca: Rca | null }) {
+  const { t, label } = useI18n();
   const related = useApi(async (): Promise<Related[]> => {
     const app = await referenceApi.application(incident.application.id);
     const links: Omit<Related, "incidents">[] = [
@@ -38,16 +40,16 @@ export default function CorrelationCard({ incident, rca }: { incident: IncidentD
   const startMs = new Date(incident.started_at ?? incident.created_at).getTime();
   const offset = (iso: string) => {
     const m = Math.round((new Date(iso).getTime() - startMs) / 60000);
-    return m === 0 ? "same time" : m > 0 ? `+${m} min` : `${m} min`;
+    return m === 0 ? t("corr.sameTime") : m > 0 ? `+${m} min` : `${m} min`;
   };
   const impacted = (related.data ?? []).filter((r) => r.incidents.length > 0);
   const quiet = (related.data ?? []).filter((r) => r.incidents.length === 0);
 
   return (
-    <Card title={<span className="flex items-center gap-2"><Network size={16} aria-hidden="true" /> Change correlation &amp; impact</span>}>
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Recent changes linked to this incident</h3>
+    <Card title={<span className="flex items-center gap-2"><Network size={16} aria-hidden="true" /> {t("corr.title")}</span>}>
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t("corr.changes")}</h3>
       {changes.length === 0 ? (
-        <p className="mt-1 text-sm text-slate-500">No change linked yet.</p>
+        <p className="mt-1 text-sm text-slate-500">{t("corr.noChange")}</p>
       ) : (
         <ul className="mt-2 space-y-2">
           {changes.map((c) => (
@@ -57,22 +59,22 @@ export default function CorrelationCard({ incident, rca }: { incident: IncidentD
               <span className="text-slate-800">{c.change.title}{c.change.version ? ` (${c.change.version})` : ""}</span>
               {c.minutes_from_deployment_to_incident !== null && (
                 <span className="rounded bg-amber-200 px-1.5 py-0.5 text-xs font-semibold text-amber-900">
-                  deployed {Math.round(c.minutes_from_deployment_to_incident)} min before impact
+                  {t("corr.deployedBefore", { n: Math.round(c.minutes_from_deployment_to_incident) })}
                 </span>
               )}
-              <span className="text-xs text-slate-500">{c.link_status.replaceAll("_", " ").toLowerCase()}</span>
+              <span className="text-xs text-slate-500">{label(c.link_status).toLowerCase()}</span>
             </li>
           ))}
         </ul>
       )}
 
       <h3 className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
-        Connected applications with incidents within {WINDOW_HOURS} h
+        {t("corr.connected", { h: WINDOW_HOURS })}
       </h3>
       {related.loading && !related.data ? (
-        <p className="mt-1 text-sm text-slate-500">Checking dependencies…</p>
+        <p className="mt-1 text-sm text-slate-500">{t("corr.checking")}</p>
       ) : impacted.length === 0 ? (
-        <p className="mt-1 text-sm text-slate-500">No incidents on connected applications in this window.</p>
+        <p className="mt-1 text-sm text-slate-500">{t("corr.noneConnected")}</p>
       ) : (
         <ul className="mt-2 space-y-2">
           {impacted.map((r) => (
@@ -85,8 +87,8 @@ export default function CorrelationCard({ incident, rca }: { incident: IncidentD
                 )}
                 <b className="font-semibold text-navy-900">{r.app.code} - {r.app.name}</b>
                 <span className="text-xs text-slate-500">
-                  {r.direction === "downstream" ? `depends on ${incident.application.code}` : `${incident.application.code} depends on it`}
-                  {" · "}{r.app.business_criticality.replace("_", " ").toLowerCase()}
+                  {r.direction === "downstream" ? t("corr.dependsOn", { code: incident.application.code }) : t("corr.dependsOnIt", { code: incident.application.code })}
+                  {" · "}{label(r.app.business_criticality)}
                 </span>
               </div>
               <ul className="mt-1.5 space-y-1 pl-6">
@@ -105,9 +107,9 @@ export default function CorrelationCard({ incident, rca }: { incident: IncidentD
         </ul>
       )}
       {quiet.length > 0 && (
-        <p className="mt-2 text-xs text-slate-500">Quiet in this window: {quiet.map((r) => r.app.code).join(", ")}</p>
+        <p className="mt-2 text-xs text-slate-500">{t("corr.quiet", { codes: quiet.map((r) => r.app.code).join(", ") })}</p>
       )}
-      <p className="mt-3 text-xs text-slate-500">Correlation is evidence, not proof - an engineer confirms the cause in Root cause analysis.</p>
+      <p className="mt-3 text-xs text-slate-500">{t("corr.note")}</p>
     </Card>
   );
 }

@@ -14,7 +14,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.ai.analysis_service import AnalysisService
 from app.api.deps import DbSession
-from app.api.routes import ai, analytics, applications, evidence, incidents, rca
+from app.api.routes import ai, analytics, applications, evidence, incidents, rca, reports
 from app.core.config import get_settings
 from app.core.exceptions import DomainError
 from app.core.logging import configure_logging
@@ -98,6 +98,7 @@ app.include_router(analytics.router)
 app.include_router(applications.router)
 app.include_router(evidence.router)
 app.include_router(ai.router)
+app.include_router(reports.router)
 
 
 @app.get("/api/health", tags=["Health"])

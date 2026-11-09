@@ -1,5 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
+import { currentLocale, translate } from "../i18n";
+
 export function Card({ title, actions, children, className = "" }: { title?: ReactNode; actions?: ReactNode; children: ReactNode; className?: string }) {
   return (
     <section className={`rounded-lg bg-white shadow-sm ring-1 ring-slate-200 ${className}`}>
@@ -50,7 +52,7 @@ export function ErrorBanner({ message, onClose }: { message: string | null; onCl
     <div role="alert" className="flex items-start justify-between gap-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800 ring-1 ring-red-200">
       <span>{message}</span>
       {onClose && (
-        <button onClick={onClose} className="font-medium" aria-label="Dismiss">
+        <button onClick={onClose} className="font-medium" aria-label={translate("common.dismiss")}>
           ×
         </button>
       )}
@@ -64,20 +66,20 @@ export function Empty({ children }: { children: ReactNode }) {
 
 export function formatTime(iso: string | null | undefined): string {
   if (!iso) return "-";
-  return new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+  return new Date(iso).toLocaleString(currentLocale(), { dateStyle: "medium", timeStyle: "short" });
 }
 
 export function timeAgo(iso: string | null | undefined): string {
   if (!iso) return "-";
   const minutes = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes} min ago`;
-  if (minutes < 48 * 60) return `${Math.round(minutes / 60)} h ago`;
-  return `${Math.round(minutes / 1440)} days ago`;
+  if (minutes < 1) return translate("time.justNow");
+  if (minutes < 60) return translate("time.minAgo", { n: minutes });
+  if (minutes < 48 * 60) return translate("time.hAgo", { n: Math.round(minutes / 60) });
+  return translate("time.daysAgo", { n: Math.round(minutes / 1440) });
 }
 
 export function minutesLabel(minutes: number): string {
   const abs = Math.abs(Math.round(minutes));
-  const text = abs >= 60 ? `${Math.floor(abs / 60)} h ${abs % 60} min` : `${abs} min`;
-  return minutes < 0 ? `${text} overdue` : text;
+  const text = abs >= 60 ? translate("time.hMin", { h: Math.floor(abs / 60), m: abs % 60 }) : translate("time.min", { m: abs });
+  return minutes < 0 ? translate("time.overdue", { t: text }) : text;
 }

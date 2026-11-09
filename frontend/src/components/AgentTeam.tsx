@@ -4,16 +4,19 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { useI18n } from "../i18n";
+import type { MessageKey } from "../i18n/en";
 import type { AgentExecution, AgentFinding, Calculation, Investigation } from "../types/incident";
 import { Card } from "./ui";
 
-const AGENTS: Record<string, { title: string; icon: LucideIcon; job: string }> = {
-  triage: { title: "Triage", icon: ClipboardList, job: "Symptoms, timing, severity and SLA" },
-  supervisor: { title: "Supervisor", icon: Workflow, job: "Decides which specialists the incident needs" },
-  change_release: { title: "Change & release", icon: GitCommitHorizontal, job: "Deployments close to the start of impact" },
-  dependency_impact: { title: "Dependency & impact", icon: Network, job: "Blast radius across connected applications" },
-  operational_risk: { title: "Operational risk", icon: Gauge, job: "Change risk, recurrence, SLA exposure" },
-  root_cause: { title: "Root cause", icon: Brain, job: "Combines the findings into the report" },
+// Titles and job descriptions come from the dictionaries: agent.<name> and agent.<name>.job
+const AGENTS: Record<string, { icon: LucideIcon }> = {
+  triage: { icon: ClipboardList },
+  supervisor: { icon: Workflow },
+  change_release: { icon: GitCommitHorizontal },
+  dependency_impact: { icon: Network },
+  operational_risk: { icon: Gauge },
+  root_cause: { icon: Brain },
 };
 const SPECIALISTS = ["change_release", "dependency_impact", "operational_risk"];
 
@@ -58,6 +61,9 @@ function Ids({ ids }: { ids: string[] }) {
 
 /** The agent team: who ran, in what order, which tools they called and what they found. */
 export default function AgentTeam({ inv }: { inv: Investigation }) {
+  const { t, label } = useI18n();
+  const title = (name: string) => (name in AGENTS ? t(`agent.${name}` as MessageKey) : name);
+  const job = (name: string) => (name in AGENTS ? t(`agent.${name}.job` as MessageKey) : "");
   const [now, setNow] = useState(Date.now());
   const running = inv.status === "RUNNING";
   useEffect(() => {
@@ -78,39 +84,37 @@ export default function AgentTeam({ inv }: { inv: Investigation }) {
 
   return (
     <Card
-      title={<span className="flex items-center gap-2"><Workflow size={16} aria-hidden="true" /> Agent team (LangGraph)</span>}
-      actions={<span className="text-xs text-slate-500">{inv.executions.length} step{inv.executions.length === 1 ? "" : "s"}{tokens > 0 && ` · ${tokens.toLocaleString()} tokens`}</span>}
+      title={<span className="flex items-center gap-2"><Workflow size={16} aria-hidden="true" /> {t("team.title")}</span>}
+      actions={<span className="text-xs text-slate-500">{inv.executions.length === 1 ? t("team.step") : t("team.steps", { n: inv.executions.length })}{tokens > 0 && ` · ${t("team.tokens", { n: tokens.toLocaleString() })}`}</span>}
     >
       {/* flow strip */}
       <div className="flex flex-wrap items-center gap-1.5">
         {flow.map((name, n) => {
-          const meta = AGENTS[name];
           const st = name === "?" ? "waiting" : stateOf(byName[name]);
-          const Icon = meta?.icon ?? Workflow;
+          const Icon = AGENTS[name]?.icon ?? Workflow;
           return (
             <div key={`${name}-${n}`} className="flex items-center gap-1.5">
               {n > 0 && <ChevronRight size={14} className="text-slate-400" aria-hidden="true" />}
               <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ${NODE_STYLE[st]}`}>
                 {st === "running" ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <Icon size={13} aria-hidden="true" />}
-                {meta?.title ?? "specialists…"}
+                {name === "?" ? t("team.specialists") : title(name)}
               </span>
             </div>
           );
         })}
         <ChevronRight size={14} className="text-slate-400" aria-hidden="true" />
         <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ${NODE_STYLE[human]}`}>
-          <ShieldCheck size={13} aria-hidden="true" /> Human review
+          <ShieldCheck size={13} aria-hidden="true" /> {t("team.humanReview")}
         </span>
       </div>
       {skipped.length > 0 && (
-        <p className="mt-2 text-xs text-slate-500">Not needed for this incident (supervisor's choice): {skipped.map((s) => AGENTS[s].title).join(", ")}</p>
+        <p className="mt-2 text-xs text-slate-500">{t("team.skipped", { list: skipped.map(title).join(", ") })}</p>
       )}
 
       {/* steps */}
       <ol className="mt-4 space-y-3">
         {inv.executions.map((step) => {
-          const meta = AGENTS[step.agent_name] ?? { title: step.agent_name, icon: Workflow, job: "" };
-          const Icon = meta.icon;
+          const Icon = AGENTS[step.agent_name]?.icon ?? Workflow;
           const st = stateOf(step);
           const finding = (findings[step.agent_name] ?? step.output?.finding) as AgentFinding | undefined;
           return (
@@ -118,24 +122,24 @@ export default function AgentTeam({ inv }: { inv: Investigation }) {
               <div className="flex flex-wrap items-center gap-2">
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-navy-900 text-xs font-semibold text-white">{step.step_order}</span>
                 <Icon size={16} className="text-navy-800" aria-hidden="true" />
-                <b className="font-semibold text-navy-900">{meta.title}</b>
-                <span className="text-xs text-slate-500">{meta.job}</span>
+                <b className="font-semibold text-navy-900">{title(step.agent_name)}</b>
+                <span className="text-xs text-slate-500">{job(step.agent_name)}</span>
                 <span className="ml-auto flex items-center gap-2 text-xs text-slate-500">
                   {st === "running" && <Loader2 size={13} className="animate-spin text-blue-700" aria-hidden="true" />}
                   <span className={st === "failed" ? "font-medium text-red-700" : st === "running" ? "font-medium text-blue-800" : ""}>
-                    {st === "running" ? "working" : step.status.toLowerCase()} · {duration(seconds(step, now))}
+                    {st === "running" ? t("team.working") : label(step.status).toLowerCase()} · {duration(seconds(step, now))}
                   </span>
-                  {step.input_tokens != null && <span>{step.input_tokens} in / {step.output_tokens} out</span>}
+                  {step.input_tokens != null && <span>{t("team.tokensInOut", { in: step.input_tokens, out: step.output_tokens ?? 0 })}</span>}
                 </span>
               </div>
 
               {step.tool_calls.length > 0 && (
                 <div className="mt-2 flex flex-wrap items-center gap-1.5 pl-8">
                   <Wrench size={12} className="text-slate-400" aria-hidden="true" />
-                  {step.tool_calls.map((t) => (
-                    <code key={t.tool} className="rounded bg-violet-50 px-1.5 py-0.5 text-xs text-violet-800 ring-1 ring-violet-200"
-                      title={t.result ? JSON.stringify(t.result) : undefined}>
-                      {t.tool}{t.ms != null && <span className="text-violet-500"> {t.ms} ms</span>}
+                  {step.tool_calls.map((tc) => (
+                    <code key={tc.tool} className="rounded bg-violet-50 px-1.5 py-0.5 text-xs text-violet-800 ring-1 ring-violet-200"
+                      title={tc.result ? JSON.stringify(tc.result) : undefined}>
+                      {tc.tool}{tc.ms != null && <span className="text-violet-500"> {tc.ms} ms</span>}
                     </code>
                   ))}
                 </div>
@@ -146,16 +150,16 @@ export default function AgentTeam({ inv }: { inv: Investigation }) {
                   <div className="mt-2 text-sm text-slate-700">
                     <p>{String(step.output.reasoning ?? "")}</p>
                     <p className="mt-1 text-xs text-slate-500">
-                      Plan: {(step.output.plan as string[] | undefined)?.length
-                        ? (step.output.plan as string[]).map((p) => AGENTS[p]?.title ?? p).join(" → ")
-                        : "no specialists needed, straight to root cause"}
+                      {t("team.plan", { plan: (step.output.plan as string[] | undefined)?.length
+                        ? (step.output.plan as string[]).map(title).join(" → ")
+                        : t("team.noSpecialists") })}
                     </p>
                   </div>
                 )}
                 {finding && (
                   <div className="mt-2 text-sm">
                     <p className="text-slate-800">
-                      <span className={`mr-2 rounded px-1.5 py-0.5 text-xs font-semibold ${RISK_STYLE[finding.risk_signal]}`}>{finding.risk_signal}</span>
+                      <span className={`mr-2 rounded px-1.5 py-0.5 text-xs font-semibold ${RISK_STYLE[finding.risk_signal]}`}>{label(finding.risk_signal)}</span>
                       {finding.summary}
                     </p>
                     {finding.findings.length > 0 && (
@@ -164,14 +168,13 @@ export default function AgentTeam({ inv }: { inv: Investigation }) {
                       </ul>
                     )}
                     {finding.open_questions.length > 0 && (
-                      <p className="mt-1.5 text-xs text-slate-500">Open questions: {finding.open_questions.join(" · ")}</p>
+                      <p className="mt-1.5 text-xs text-slate-500">{t("team.openQuestions", { list: finding.open_questions.join(" · ") })}</p>
                     )}
                   </div>
                 )}
                 {step.agent_name === "root_cause" && st === "done" && inv.report && (
                   <p className="mt-2 text-sm text-slate-700">
-                    Wrote the report below: {inv.report.root_cause_hypotheses.length} hypotheses, {inv.report.recommended_actions.length} recommended
-                    actions, overall confidence {inv.report.overall_confidence}. Guardrails then checked it.
+                    {t("team.rootDone", { h: inv.report.root_cause_hypotheses.length, a: inv.report.recommended_actions.length, c: label(inv.report.overall_confidence) })}
                   </p>
                 )}
                 {step.error_message && <p className="mt-2 text-sm text-red-700">{step.error_message}</p>}
@@ -181,7 +184,7 @@ export default function AgentTeam({ inv }: { inv: Investigation }) {
         })}
         {running && (
           <li className="rounded-md border border-dashed border-slate-300 p-3 text-xs text-slate-500">
-            Next steps appear here as the supervisor routes the work. Hosted models finish in about a minute; a local model can take 10-20 minutes.
+            {t("team.next")}
           </li>
         )}
       </ol>
@@ -192,15 +195,16 @@ export default function AgentTeam({ inv }: { inv: Investigation }) {
 }
 
 function Calculations({ calc }: { calc?: { impact?: Calculation; risk?: Calculation } }) {
-  const items = [calc?.impact && ["Incident impact", calc.impact], calc?.risk && ["Operational risk", calc.risk]].filter(Boolean) as [string, Calculation][];
+  const { t, label } = useI18n();
+  const items = [calc?.impact && [t("team.impact"), calc.impact], calc?.risk && [t("team.risk"), calc.risk]].filter(Boolean) as [string, Calculation][];
   if (!items.length) return null;
   return (
     <div className="mt-4 grid gap-3 sm:grid-cols-2">
-      {items.map(([label, c]) => (
+      {items.map(([name, c]) => (
         <div key={c.id} className="rounded-md bg-slate-50 p-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="font-medium text-navy-900">{label} <code className="text-xs text-slate-500">{c.id}</code></span>
-            <span className={`rounded px-1.5 py-0.5 text-xs font-semibold ${RISK_STYLE[c.band]}`}>{c.score}/100 {c.band}</span>
+            <span className="font-medium text-navy-900">{name} <code className="text-xs text-slate-500">{c.id}</code></span>
+            <span className={`rounded px-1.5 py-0.5 text-xs font-semibold ${RISK_STYLE[c.band]}`}>{c.score}/100 {label(c.band)}</span>
           </div>
           <div className="mt-2 h-1.5 rounded bg-slate-200">
             <div className={`h-1.5 rounded ${c.band === "HIGH" ? "bg-red-500" : c.band === "MEDIUM" ? "bg-amber-500" : "bg-slate-500"}`} style={{ width: `${c.score}%` }} />
@@ -221,12 +225,13 @@ export type AnalysisMode = "single" | "agents";
 
 /** Choose between the one-call analysis and the LangGraph agent team. */
 export function ModePicker({ mode, onChange, agentsLeft }: { mode: AnalysisMode; onChange: (m: AnalysisMode) => void; agentsLeft?: number | null }) {
+  const { t } = useI18n();
   const options: { value: AnalysisMode; label: string; hint: string }[] = [
-    { value: "single", label: "Single AI call", hint: "fastest: one call with the full fact base" },
-    { value: "agents", label: "Agent team", hint: `triage, supervisor, specialists, root cause${agentsLeft != null ? ` · ${agentsLeft} left today` : ""}` },
+    { value: "single", label: t("mode.single"), hint: t("mode.singleHint") },
+    { value: "agents", label: t("mode.agents"), hint: `${t("mode.agentsHint")}${agentsLeft != null ? ` · ${t("mode.leftToday", { n: agentsLeft })}` : ""}` },
   ];
   return (
-    <div role="radiogroup" aria-label="Analysis mode" className="grid gap-2 sm:grid-cols-2">
+    <div role="radiogroup" aria-label={t("mode.label")} className="grid gap-2 sm:grid-cols-2">
       {options.map((o) => (
         <label key={o.value} className={`flex cursor-pointer items-start gap-2 rounded-md p-2 text-sm ring-1 ${mode === o.value ? "bg-navy-900/5 ring-navy-800" : "ring-slate-200 hover:bg-slate-50"}`}>
           <input type="radio" name="analysis-mode" className="mt-1" checked={mode === o.value} onChange={() => onChange(o.value)} />

@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { SeverityBadge, SlaBadge, StatusBadge } from "../components/Badges";
 import { Button, Card, Empty, ErrorBanner, Field, inputClass, timeAgo } from "../components/ui";
 import { useApi } from "../hooks/useApi";
+import { useI18n } from "../i18n";
 import { errorMessage, incidentApi, referenceApi, type NewIncident } from "../services/api";
 import type { Application, ReferenceData } from "../types/incident";
 
@@ -16,6 +17,7 @@ export default function IncidentsPage() {
   const [scope, setScope] = useState<"active" | "all">("active");
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const { t } = useI18n();
 
   const apps = useApi(referenceApi.applications);
   const ref = useApi(referenceApi.referenceData);
@@ -36,10 +38,10 @@ export default function IncidentsPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-navy-900">Incident management</h1>
+        <h1 className="text-xl font-semibold text-navy-900">{t("inc.title")}</h1>
         <Button onClick={() => setShowForm((v) => !v)}>
           {showForm ? <X size={16} aria-hidden="true" /> : <Plus size={16} aria-hidden="true" />}
-          {showForm ? "Close form" : "New incident"}
+          {showForm ? t("inc.closeForm") : t("inc.new")}
         </Button>
       </div>
 
@@ -49,25 +51,25 @@ export default function IncidentsPage() {
 
       <Card>
         <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <select aria-label="Application" value={appId} onChange={(e) => setAppId(e.target.value)} className={inputClass}>
-            <option value="">All applications</option>
+          <select aria-label={t("col.application")} value={appId} onChange={(e) => setAppId(e.target.value)} className={inputClass}>
+            <option value="">{t("inc.allApps")}</option>
             {apps.data?.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.code} - {a.name}
               </option>
             ))}
           </select>
-          <select aria-label="Severity" value={severity} onChange={(e) => setSeverity(e.target.value)} className={inputClass}>
-            <option value="">All severities</option>
+          <select aria-label={t("col.severity")} value={severity} onChange={(e) => setSeverity(e.target.value)} className={inputClass}>
+            <option value="">{t("inc.allSeverities")}</option>
             {["P1", "P2", "P3", "P4"].map((s) => (
               <option key={s}>{s}</option>
             ))}
           </select>
-          <select aria-label="Status scope" value={scope} onChange={(e) => setScope(e.target.value as "active" | "all")} className={inputClass}>
-            <option value="active">Active incidents</option>
-            <option value="all">All incidents</option>
+          <select aria-label={t("col.status")} value={scope} onChange={(e) => setScope(e.target.value as "active" | "all")} className={inputClass}>
+            <option value="active">{t("inc.active")}</option>
+            <option value="all">{t("inc.all")}</option>
           </select>
-          <input aria-label="Search" placeholder="Search title or INC-…" value={search} onChange={(e) => setSearch(e.target.value)} className={inputClass} />
+          <input aria-label={t("inc.search")} placeholder={t("inc.search")} value={search} onChange={(e) => setSearch(e.target.value)} className={inputClass} />
         </div>
 
         <ErrorBanner message={incidents.error} />
@@ -75,7 +77,7 @@ export default function IncidentsPage() {
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs uppercase text-slate-500">
               <tr>
-                {["Reference", "Severity", "Title", "Application", "Status", "Assigned", "Resolution SLA", "Created"].map((h) => (
+                {[t("col.reference"), t("col.severity"), t("col.title"), t("col.application"), t("col.status"), t("col.assigned"), t("col.resolutionSla"), t("col.created")].map((h) => (
                   <th key={h} className="whitespace-nowrap px-3 py-2 font-medium">
                     {h}
                   </th>
@@ -103,7 +105,7 @@ export default function IncidentsPage() {
               ))}
             </tbody>
           </table>
-          {incidents.data && incidents.data.items.length === 0 && <Empty>No incidents match these filters.</Empty>}
+          {incidents.data && incidents.data.items.length === 0 && <Empty>{t("inc.noMatch")}</Empty>}
         </div>
       </Card>
     </div>
@@ -112,6 +114,7 @@ export default function IncidentsPage() {
 
 function CreateIncidentForm({ applications, reference, onCancel }: { applications: Application[]; reference: ReferenceData; onCancel: () => void }) {
   const navigate = useNavigate();
+  const { t, label } = useI18n();
   const [form, setForm] = useState<NewIncident>({
     title: "",
     description: "",
@@ -129,8 +132,8 @@ function CreateIncidentForm({ applications, reference, onCancel }: { application
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (form.title.trim().length < 5) return setError("Title needs at least 5 characters.");
-    if (form.description.trim().length < 10) return setError("Description needs at least 10 characters.");
+    if (form.title.trim().length < 5) return setError(t("form.titleShort"));
+    if (form.description.trim().length < 10) return setError(t("form.descriptionShort"));
     setSaving(true);
     setError(null);
     try {
@@ -150,18 +153,18 @@ function CreateIncidentForm({ applications, reference, onCancel }: { application
   };
 
   return (
-    <Card title="New incident">
+    <Card title={t("inc.new")}>
       <form onSubmit={submit} className="grid gap-4 md:grid-cols-2">
-        <Field label="Application">
+        <Field label={t("form.application")}>
           <select value={form.application_id} onChange={(e) => set("application_id", Number(e.target.value))} className={inputClass}>
             {applications.map((a) => (
               <option key={a.id} value={a.id}>
-                {a.code} - {a.name} ({a.business_criticality.replace("_", " ")})
+                {a.code} - {a.name} ({label(a.business_criticality)})
               </option>
             ))}
           </select>
         </Field>
-        <Field label="Severity" hint={selectedSeverity ? `${selectedSeverity.label}: ${selectedSeverity.criteria[0]}. Demo SLA ${selectedSeverity.response_target_minutes} min response / ${selectedSeverity.resolution_target_minutes} min resolution.` : undefined}>
+        <Field label={t("form.severity")} hint={selectedSeverity ? t("form.severityHint", { label: selectedSeverity.label, criteria: selectedSeverity.criteria[0], response: selectedSeverity.response_target_minutes, resolution: selectedSeverity.resolution_target_minutes }) : undefined}>
           <select value={form.severity} onChange={(e) => set("severity", e.target.value)} className={inputClass}>
             {reference.severities.map((s) => (
               <option key={s.code} value={s.code}>
@@ -170,41 +173,41 @@ function CreateIncidentForm({ applications, reference, onCancel }: { application
             ))}
           </select>
         </Field>
-        <Field label="Title">
-          <input value={form.title} onChange={(e) => set("title", e.target.value)} className={inputClass} placeholder="e.g. Core banking balance enquiries timing out" />
+        <Field label={t("form.title")}>
+          <input value={form.title} onChange={(e) => set("title", e.target.value)} className={inputClass} placeholder={t("form.titlePh")} />
         </Field>
-        <Field label="Category">
+        <Field label={t("form.category")}>
           <select value={form.category} onChange={(e) => set("category", e.target.value)} className={inputClass}>
             {reference.categories.map((c) => (
               <option key={c} value={c}>
-                {c.replaceAll("_", " ")}
+                {label(c)}
               </option>
             ))}
           </select>
         </Field>
         <div className="md:col-span-2">
-          <Field label="Description">
-            <textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={3} className={inputClass} placeholder="What is failing, since when, and what users see" />
+          <Field label={t("form.description")}>
+            <textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={3} className={inputClass} placeholder={t("form.descriptionPh")} />
           </Field>
         </div>
-        <Field label="Business impact (optional)">
+        <Field label={t("form.impact")}>
           <input value={form.business_impact} onChange={(e) => set("business_impact", e.target.value)} className={inputClass} />
         </Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Assign to team (optional)" hint="Assigning acknowledges the incident">
+          <Field label={t("form.team")} hint={t("form.teamHint")}>
             <input value={form.assigned_team} onChange={(e) => set("assigned_team", e.target.value)} className={inputClass} />
           </Field>
-          <Field label="Engineer (optional)">
+          <Field label={t("form.engineer")}>
             <input value={form.assigned_engineer} onChange={(e) => set("assigned_engineer", e.target.value)} className={inputClass} />
           </Field>
         </div>
         <div className="space-y-3 md:col-span-2">
           <ErrorBanner message={error} onClose={() => setError(null)} />
           <div className="flex gap-2">
-            <Button type="submit" disabled={saving}>{saving ? "Creating…" : "Create incident"}</Button>
-            <Button type="button" variant="secondary" onClick={onCancel}>Cancel</Button>
+            <Button type="submit" disabled={saving}>{saving ? t("form.creating") : t("form.create")}</Button>
+            <Button type="button" variant="secondary" onClick={onCancel}>{t("common.cancel")}</Button>
           </div>
-          <p className="text-xs text-slate-500">Priority is derived from severity and the application's criticality. The incident gets the next INC- number.</p>
+          <p className="text-xs text-slate-500">{t("form.priorityNote")}</p>
         </div>
       </form>
     </Card>

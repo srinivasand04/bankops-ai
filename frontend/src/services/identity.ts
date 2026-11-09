@@ -9,9 +9,9 @@ export interface Identity {
 }
 
 export const DEMO_USERS: Identity[] = [
-  { name: "a.patel", role: "ENGINEER", label: "a.patel - Engineer" },
-  { name: "incident.manager", role: "INCIDENT_MANAGER", label: "incident.manager - Incident manager" },
-  { name: "risk.viewer", role: "VIEWER", label: "risk.viewer - Viewer (read only)" },
+  { name: "engineer", role: "ENGINEER", label: "Engineer" },
+  { name: "incident.manager", role: "INCIDENT_MANAGER", label: "Incident manager" },
+  { name: "risk.viewer", role: "VIEWER", label: "Viewer (read only)" },
 ];
 
 const KEY = "bankops.identity";

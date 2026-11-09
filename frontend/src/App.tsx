@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import Layout from "./components/Layout";
@@ -9,6 +9,8 @@ import IncidentDetailPage from "./pages/IncidentDetailPage";
 import IncidentsPage from "./pages/IncidentsPage";
 import InvestigationDetailPage from "./pages/InvestigationDetailPage";
 import InvestigationsPage from "./pages/InvestigationsPage";
+// Charts library is large - load the reports page only when it is opened
+const ReportsPage = lazy(() => import("./pages/ReportsPage"));
 import { getIdentity, setIdentity, type Identity } from "./services/identity";
 
 export default function App() {
@@ -30,6 +32,7 @@ export default function App() {
             <Route path="/incidents/:id" element={<IncidentDetailPage identity={identity} />} />
             <Route path="/investigations" element={<InvestigationsPage identity={identity} />} />
             <Route path="/investigations/:id" element={<InvestigationDetailPage identity={identity} />} />
+            <Route path="/reports" element={<Suspense fallback={null}><ReportsPage /></Suspense>} />
             <Route path="/architecture" element={<ArchitecturePage />} />
           </Routes>
         </ServerGate>

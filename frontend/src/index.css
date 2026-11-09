@@ -10,3 +10,13 @@
 body {
   @apply bg-slate-100 text-slate-900 antialiased;
 }
+
+/* Printing / "Save as PDF" of the management report: hide the app chrome, keep colours, break between sections */
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; }
+  main { max-width: none !important; padding: 0 !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .print-break { break-before: page; }
+  section, table, tr { break-inside: avoid; }
+}

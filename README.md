@@ -44,6 +44,8 @@ Pages: **Dashboard** (KPIs, AI review queue), **Incidents** (filters, *New incid
 with assign / status buttons / timeline notes / root-cause confirm-reject / CAPA), **AI investigations**
 (start an analysis, live progress, report, *Approve* / *Reject*). The *Acting as* selector switches
 between demo users (engineer, incident manager, viewer) to show the role rules.
+The **EN / FR** switch in the header translates every screen; the choice is remembered in the
+browser. Incident data and AI-written text stay in the language they were written in.
 
 ```powershell
 cd frontend
@@ -68,13 +70,29 @@ uvicorn app.main:app --reload --port 8000
 
 ```powershell
 cd backend
-.\.venv\Scripts\python.exe -m pytest              # 175 tests against the bankops_test database (AI mocked)
+.\.venv\Scripts\python.exe -m pytest              # 191 tests against the bankops_test database (AI mocked)
 .\.venv\Scripts\python.exe scripts\smoke_test.py  # end-to-end HTTP workflow against a running backend
 ```
 
 Tests run against a separate `bankops_test` database (created by `docker/postgres/init`), which is
 migrated with Alembic at the start of the session and truncated between tests. The suite refuses to
 run if `TEST_DATABASE_URL` does not point at a database ending in `_test`.
+
+## Management reports
+
+The **Reports** tab covers every application for the last 30 / 90 / 180 / 365 days:
+
+| Report | What management sees |
+|---|---|
+| Application scorecard | Each application's incidents, open / P1, SLA %, breaching now, MTTR / MTTA, changes and a RAG status |
+| SLA performance | Response and resolution compliance by severity and application; incidents breaching now, most overdue first |
+| Incident trends | Weekly or monthly volume by severity, resolutions, SLA breaches and MTTR |
+| Change risk | Changes per application, failures / roll-backs, incidents linked to changes, change failure rate |
+| Problem management | Recurring incidents (same application + category 3+ times) and reopened incidents |
+
+*Management report* puts all five on one page: **Print / save as PDF** produces the pack
+([sample](documents/management-report-sample.pdf)), and each report can be downloaded as CSV.
+API: `GET /api/reports/{scorecard|sla|trends|change-risk|problems|management-pack}?days=90`.
 
 ## Large synthetic dataset (for the ML module)
 

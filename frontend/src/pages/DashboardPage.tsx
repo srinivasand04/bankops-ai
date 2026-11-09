@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 
 import { SeverityBadge, SlaBadge, StatusBadge } from "../components/Badges";
 import { useApi } from "../hooks/useApi";
+import { useI18n } from "../i18n";
 import { aiApi, analyticsApi, incidentApi } from "../services/api";
 
 function Kpi({ label, value, icon }: { label: string; value: ReactNode; icon: ReactNode }) {
@@ -23,30 +24,31 @@ export default function DashboardPage() {
   const summary = useApi(analyticsApi.summary);
   const active = useApi(() => incidentApi.list({ active_only: true, sort: "severity", order: "asc", page_size: 10 }));
   const reviewQueue = useApi(() => aiApi.list({ status: "AWAITING_REVIEW" }));
+  const { t } = useI18n();
 
   if (summary.error || active.error) {
-    return <p className="rounded bg-red-50 p-4 text-red-800">Backend unavailable: {summary.error ?? active.error}</p>;
+    return <p className="rounded bg-red-50 p-4 text-red-800">{t("dash.backendDown", { error: summary.error ?? active.error ?? "" })}</p>;
   }
   const s = summary.data;
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-6">
-        <Kpi label="Total incidents" value={s?.total_incidents ?? "-"} icon={<Gauge size={16} />} />
-        <Kpi label="Open incidents" value={s?.open_incidents ?? "-"} icon={<AlertTriangle size={16} />} />
-        <Kpi label="Open P1" value={s?.open_p1_incidents ?? "-"} icon={<Siren size={16} />} />
-        <Kpi label="SLA breaches" value={s?.sla_breached_incidents ?? "-"} icon={<ShieldAlert size={16} />} />
-        <Kpi label="MTTR" value={s?.mttr_minutes != null ? `${Math.round(s.mttr_minutes)} min` : "-"} icon={<Clock size={16} />} />
-        <Link to="/investigations"><Kpi label="AI awaiting review" value={reviewQueue.data?.length ?? "-"} icon={<Bot size={16} />} /></Link>
+        <Kpi label={t("dash.total")} value={s?.total_incidents ?? "-"} icon={<Gauge size={16} />} />
+        <Kpi label={t("dash.open")} value={s?.open_incidents ?? "-"} icon={<AlertTriangle size={16} />} />
+        <Kpi label={t("dash.openP1")} value={s?.open_p1_incidents ?? "-"} icon={<Siren size={16} />} />
+        <Kpi label={t("dash.breaches")} value={s?.sla_breached_incidents ?? "-"} icon={<ShieldAlert size={16} />} />
+        <Kpi label={t("dash.mttr")} value={s?.mttr_minutes != null ? `${Math.round(s.mttr_minutes)} min` : "-"} icon={<Clock size={16} />} />
+        <Link to="/investigations"><Kpi label={t("dash.awaitingReview")} value={reviewQueue.data?.length ?? "-"} icon={<Bot size={16} />} /></Link>
       </div>
 
       <section className="rounded-lg bg-white shadow-sm ring-1 ring-slate-200">
-        <h2 className="border-b border-slate-200 px-4 py-3 font-semibold text-navy-900">Active incidents</h2>
+        <h2 className="border-b border-slate-200 px-4 py-3 font-semibold text-navy-900">{t("dash.active")}</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs uppercase text-slate-500">
               <tr>
-                {["Reference", "Severity", "Title", "Application", "Status", "Resolution SLA"].map((h) => (
+                {([t("col.reference"), t("col.severity"), t("col.title"), t("col.application"), t("col.status"), t("col.resolutionSla")]).map((h) => (
                   <th key={h} className="px-4 py-2 font-medium">{h}</th>
                 ))}
               </tr>
@@ -66,7 +68,7 @@ export default function DashboardPage() {
           </table>
         </div>
       </section>
-      <p className="text-xs text-slate-500">All data is synthetic. SLA targets are demonstration values.</p>
+      <p className="text-xs text-slate-500">{t("dash.synthetic")}</p>
     </div>
   );
 }

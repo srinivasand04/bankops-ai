@@ -1,3 +1,4 @@
+import { useI18n } from "../i18n";
 import type { IncidentStatus, InvestigationStatus, Priority, Severity, SlaState, Source } from "../types/incident";
 
 const base = "inline-flex items-center rounded px-2 py-0.5 text-xs font-semibold whitespace-nowrap";
@@ -36,25 +37,27 @@ const INVESTIGATION: Record<InvestigationStatus, string> = {
   FAILED: "bg-red-100 text-red-800",
 };
 
-const label = (value: string) => value.replaceAll("_", " ");
-
 export function SeverityBadge({ severity }: { severity: Severity }) {
   return <span className={`${base} ${SEVERITY[severity]}`}>{severity}</span>;
 }
 
 export function PriorityBadge({ priority }: { priority: Priority }) {
-  return <span className={`${base} bg-white text-slate-700 ring-1 ring-slate-300`}>{priority}</span>;
+  const { label } = useI18n();
+  return <span className={`${base} bg-white text-slate-700 ring-1 ring-slate-300`}>{label(priority)}</span>;
 }
 
 export function StatusBadge({ status }: { status: IncidentStatus }) {
+  const { label } = useI18n();
   return <span className={`${base} ${STATUS[status]}`}>{label(status)}</span>;
 }
 
 export function SlaBadge({ state }: { state: SlaState }) {
+  const { label } = useI18n();
   return <span className={`${base} ${SLA[state]}`}>{label(state)}</span>;
 }
 
 export function InvestigationBadge({ status }: { status: InvestigationStatus }) {
+  const { label } = useI18n();
   return (
     <span className={`${base} ${INVESTIGATION[status]}`}>
       {status === "RUNNING" && <span className="mr-1.5 h-1.5 w-1.5 animate-pulse rounded-full bg-blue-600" />}
@@ -64,6 +67,7 @@ export function InvestigationBadge({ status }: { status: InvestigationStatus }) 
 }
 
 export function SourceBadge({ source }: { source: Source }) {
+  const { label } = useI18n();
   const style = source === "AI" ? "bg-violet-100 text-violet-800" : source === "SYSTEM" ? "bg-slate-100 text-slate-600" : "bg-teal-100 text-teal-800";
-  return <span className={`${base} ${style}`}>{source}</span>;
+  return <span className={`${base} ${style}`}>{label(source)}</span>;
 }

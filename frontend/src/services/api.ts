@@ -15,6 +15,7 @@ import type {
   RootCause,
   TimelineEvent,
 } from "../types/incident";
+import type { ManagementPack } from "../types/reports";
 import { getIdentity } from "./identity";
 
 export const api = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL ?? "/api", timeout: 30000 });
@@ -93,6 +94,11 @@ export const aiApi = {
   get: (id: number) => data(api.get<Investigation>(`/ai/investigations/${id}`)),
   review: (id: number, decision: "APPROVE" | "REJECT", review_notes: string, apply_hypotheses = true, apply_actions = true) =>
     data(api.post<Investigation>(`/ai/investigations/${id}/review`, { decision, review_notes: review_notes || null, apply_hypotheses, apply_actions })),
+};
+
+export const reportsApi = {
+  // Building all five reports takes a few seconds on a large dataset
+  managementPack: (days: number) => data(api.get<ManagementPack>("/reports/management-pack", { params: { days }, timeout: 60000 })),
 };
 
 export const healthApi = {

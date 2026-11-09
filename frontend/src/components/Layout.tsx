@@ -1,25 +1,30 @@
-import { Bot, LayoutDashboard, Landmark, ListChecks, Network, UserRound } from "lucide-react";
+import { BarChart3, Bot, LayoutDashboard, Landmark, ListChecks, Network, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 
+import { LanguageToggle, useI18n } from "../i18n";
+import type { MessageKey } from "../i18n/en";
 import { DEMO_USERS, type Identity } from "../services/identity";
 
-const NAV = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/incidents", label: "Incidents", icon: ListChecks, end: false },
-  { to: "/investigations", label: "AI investigations", icon: Bot, end: false },
-  { to: "/architecture", label: "Architecture", icon: Network, end: false },
+const NAV: { to: string; label: MessageKey; icon: typeof Bot; end: boolean }[] = [
+  { to: "/", label: "nav.dashboard", icon: LayoutDashboard, end: true },
+  { to: "/incidents", label: "nav.incidents", icon: ListChecks, end: false },
+  { to: "/investigations", label: "nav.investigations", icon: Bot, end: false },
+  { to: "/reports", label: "nav.reports", icon: BarChart3, end: false },
+  { to: "/architecture", label: "nav.architecture", icon: Network, end: false },
 ];
+const ROLE_LABEL: Record<string, MessageKey> = { ENGINEER: "users.engineer", INCIDENT_MANAGER: "users.manager", VIEWER: "users.viewer" };
 
 export default function Layout({ identity, onIdentityChange, children }: { identity: Identity; onIdentityChange: (identity: Identity) => void; children: ReactNode }) {
+  const { t } = useI18n();
   return (
     <div className="min-h-screen md:flex">
-      <aside className="bg-navy-950 text-slate-200 md:w-56 md:shrink-0">
+      <aside className="no-print bg-navy-950 text-slate-200 md:w-56 md:shrink-0">
         <div className="flex items-center gap-2 px-4 py-4 text-white">
           <Landmark size={22} aria-hidden="true" />
           <div>
             <div className="font-semibold leading-tight">BankOps AI</div>
-            <div className="text-xs text-slate-400">Incident intelligence</div>
+            <div className="text-xs text-slate-400">{t("app.tagline")}</div>
           </div>
         </div>
         <nav className="flex gap-1 overflow-x-auto px-2 pb-3 md:flex-col md:pb-0">
@@ -33,17 +38,19 @@ export default function Layout({ identity, onIdentityChange, children }: { ident
               }
             >
               <Icon size={16} aria-hidden="true" />
-              {label}
+              {t(label)}
             </NavLink>
           ))}
         </nav>
       </aside>
 
       <div className="min-w-0 flex-1">
-        <header className="flex flex-wrap items-center justify-end gap-2 border-b border-slate-200 bg-white px-4 py-2 text-sm">
+        <header className="no-print flex flex-wrap items-center justify-end gap-2 border-b border-slate-200 bg-white px-4 py-2 text-sm">
+          <LanguageToggle />
+          <span className="mx-1 h-5 w-px bg-slate-200" aria-hidden="true" />
           <UserRound size={16} className="text-slate-500" aria-hidden="true" />
           <label htmlFor="identity" className="text-slate-500">
-            Acting as
+            {t("header.actingAs")}
           </label>
           <select
             id="identity"
@@ -53,14 +60,14 @@ export default function Layout({ identity, onIdentityChange, children }: { ident
           >
             {DEMO_USERS.map((u) => (
               <option key={u.name} value={u.name}>
-                {u.label}
+                {t(ROLE_LABEL[u.role])}
               </option>
             ))}
           </select>
         </header>
         <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
-        <footer className="px-4 pb-6 text-center text-xs text-slate-500">
-          Public demo with synthetic data only - it resets when the server restarts. SLA targets are demonstration values. AI output is advisory and always needs human review.
+        <footer className="no-print px-4 pb-6 text-center text-xs text-slate-500">
+          {t("footer.disclaimer")}
         </footer>
       </div>
     </div>
