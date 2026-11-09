@@ -17,8 +17,9 @@ from tests.test_ai_analysis import FakeLlm, _analysis
 GOOD = _analysis().model_dump_json()
 
 
-def _groq(handler, key="gsk_test") -> tuple[GroqLlm, list]:
+def _groq(handler, key="gsk_test", sleeps: list | None = None) -> tuple[GroqLlm, list]:
     requests = []
+    sleeps = [] if sleeps is None else sleeps
 
     def recording(request):
         requests.append(request)
@@ -26,7 +27,7 @@ def _groq(handler, key="gsk_test") -> tuple[GroqLlm, list]:
 
     settings = get_settings().model_copy(update={"groq_api_key": key})
     client = httpx.Client(base_url="https://groq.test/openai/v1", transport=httpx.MockTransport(recording))
-    return GroqLlm(settings, client=client), requests
+    return GroqLlm(settings, client=client, sleep=sleeps.append), requests
 
 
 def _reply(content: str, finish="stop", status=200, headers=None):
@@ -73,7 +74,7 @@ def test_request_shape_and_parsing():
     "handler,error,message",
     [
         (lambda r: _reply("", status=401), AiUnavailableError, "key is missing or invalid"),
-        (lambda r: _reply("", status=429, headers={"retry-after": "20"}), AiUnavailableError, "retry in about 20 s"),
+        (lambda r: _reply("", status=429, headers={"retry-after": "3600"}), AiUnavailableError, "retry in about 3600 s"),
         (lambda r: _reply("", status=413), AiResponseError, "too large"),
         (lambda r: _reply(GOOD, finish="length"), AiResponseError, "truncated"),
         (lambda r: _reply('{"summary": "x"}'), AiResponseError, "does not match"),
@@ -137,3 +138,30 @@ def test_daily_analysis_limit(monkeypatch, client, seeded):
 )
 def test_hosted_database_urls_get_the_driver(given, expected):
     assert Settings(database_url=given).database_url == expected
+
+
+def test_short_rate_limit_is_waited_out():
+    """Multi-agent runs trip the tokens-per-minute limit; a short retry-after is waited, not failed."""
+    replies = iter([_reply("", status=429, headers={"retry-after": "2"}),
+                    _reply("", status=429, headers={"retry-after": "3"}), _reply(GOOD)])
+    sleeps = []
+    llm, requests = _groq(lambda r: next(replies), sleeps=sleeps)
+    result = llm.structured(system="s", user="u", output_model=IncidentAnalysis)
+    assert result.parsed.summary and len(requests) == 3
+    assert sleeps == [2.5, 3.5]
+
+
+def test_rate_limit_gives_up_after_retries():
+    sleeps = []
+    llm, requests = _groq(lambda r: _reply("", status=429, headers={"retry-after": "1"}), sleeps=sleeps)
+    with pytest.raises(AiUnavailableError, match="rate limit"):
+        llm.structured(system="s", user="u", output_model=IncidentAnalysis)
+    assert len(requests) == get_settings().groq_rate_limit_retries + 1 and len(sleeps) == len(requests) - 1
+
+
+def test_long_rate_limit_is_not_waited():
+    sleeps = []
+    llm, requests = _groq(lambda r: _reply("", status=429, headers={"retry-after": "600"}), sleeps=sleeps)
+    with pytest.raises(AiUnavailableError, match="600 s"):
+        llm.structured(system="s", user="u", output_model=IncidentAnalysis)
+    assert len(requests) == 1 and sleeps == []

@@ -80,6 +80,8 @@ class Settings(BaseSettings):
     groq_reasoning_effort: Literal["low", "medium", "high"] = "low"
     groq_max_tokens: int = Field(default=4096, ge=512, le=32768)
     groq_timeout_seconds: float = Field(default=120, gt=0)
+    # Retries after a short 429 (tokens-per-minute) on the free tier; each waits Groq's retry-after
+    groq_rate_limit_retries: int = Field(default=4, ge=0, le=10)
 
     # ---- Ollama (local models) ----
     ollama_base_url: str = "http://localhost:11434"
