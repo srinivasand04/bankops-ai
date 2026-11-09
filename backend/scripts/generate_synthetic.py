@@ -24,12 +24,13 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--months", type=int, default=12)
     parser.add_argument("--scale", type=float, default=1.0, help="1.0 = about 4,000 incidents / 650 changes per year")
+    parser.add_argument("--evidence-days", type=int, default=None, help="keep hourly metrics / job runs only for the last N days")
     parser.add_argument("--end", type=lambda s: datetime.fromisoformat(s).replace(tzinfo=UTC),
                         help="last day of history (YYYY-MM-DD, default: today 00:00 UTC)")
     parser.add_argument("--out", type=Path, default=Path(__file__).resolve().parents[1] / "datasets" / "synthetic_large")
     args = parser.parse_args()
 
-    config = GeneratorConfig(seed=args.seed, months=args.months, scale=args.scale)
+    config = GeneratorConfig(seed=args.seed, months=args.months, scale=args.scale, evidence_days=args.evidence_days)
     if args.end:
         config.end = args.end
     started = time.perf_counter()

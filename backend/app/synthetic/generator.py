@@ -132,6 +132,9 @@ class GeneratorConfig:
     months: int = 12
     scale: float = 1.0
     end: datetime = field(default_factory=lambda: datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0))
+    # Keep hourly metrics and job runs only for the last N days (None = all). Incidents, changes and the
+    # alerts/logs around incidents are unchanged - used by the hosted demo to stay small and quick to load.
+    evidence_days: int | None = None
 
 
 @dataclass
@@ -469,6 +472,9 @@ class SyntheticGenerator:
         self.generate_changes()
         self.generate_incidents()
         self.generate_evidence()
+        if self.cfg.evidence_days is not None:  # trimmed after generation, so every other record is identical
+            cutoff = iso(self.end - timedelta(days=self.cfg.evidence_days))
+            self.events = [e for e in self.events if e["event_type"] not in ("METRIC", "JOB_RUN") or e["occurred_at"] >= cutoff]
         self.events.sort(key=lambda e: (e["occurred_at"], e["application"], e["event_type"], e["message"]))
         applications = [{"code": a.code, "name": a.name, "business_criticality": a.tier, "description": a.description,
                          "technology_stack": a.stack, "owner_team": a.owner_team, "health_status": "HEALTHY"} for a in APPS]

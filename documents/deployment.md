@@ -57,6 +57,10 @@ All four sign up with your GitHub account. Secrets are pasted only into each ser
 - The first visit after idle shows "Waking up the demo server" for up to a minute.
 - Run an analysis on INC-1012 (see the [user guide](user-guide.md)); with Groq it takes seconds.
 - The AI card shows how many demo analyses are left today.
+- **12 months of history:** after start-up the API loads the seeded synthetic history in the background
+  (4,000 incidents, 648 changes, 14 days of hourly metrics; `DEMO_LARGE_DATA`, on by default when
+  `DEMO_RESET_ON_START=true`). `GET /api/health` shows `demo_history: RUNNING / DONE`. It takes 1-3 minutes
+  on the free tiers; until then the site shows only the 15 demo incidents.
 - ML Lab and the *ML insights* card work from the shipped model bundle (`backend/ml_bundle`, about 15 MB),
   loaded into the empty database at startup. After retraining locally, run `python -m app.ml export-bundle`
   and commit `backend/ml_bundle` to update the hosted models.

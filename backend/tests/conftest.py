@@ -33,6 +33,7 @@ os.environ.update({
     "AI_DAILY_LIMIT": "0",
     "AI_AGENT_DAILY_LIMIT": "0",
     "ML_BUNDLE_AUTOLOAD": "false",
+    "DEMO_LARGE_DATA": "false",
 })
 get_settings.cache_clear()
 

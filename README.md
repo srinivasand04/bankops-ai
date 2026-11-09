@@ -74,7 +74,7 @@ uvicorn app.main:app --reload --port 8000
 
 ```powershell
 cd backend
-.\.venv\Scripts\python.exe -m pytest              # 209 tests against the bankops_test database (AI mocked)
+.\.venv\Scripts\python.exe -m pytest              # 211 tests against the bankops_test database (AI mocked)
 .\.venv\Scripts\python.exe scripts\smoke_test.py  # end-to-end HTTP workflow against a running backend
 ```
 

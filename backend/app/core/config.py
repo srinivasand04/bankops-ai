@@ -78,6 +78,17 @@ class Settings(BaseSettings):
     # Load backend/ml_bundle into an empty ml_model_runs table at startup (off in the test suite)
     ml_bundle_autoload: bool = True
 
+    # ---- Hosted demo ----
+    # Reset to the demo data on every start (read by docker-entrypoint.sh)
+    demo_reset_on_start: bool = False
+    # Also load 12 months of seeded synthetic history in the background after start-up.
+    # Unset = follow DEMO_RESET_ON_START, so the hosted demo gets it without extra configuration.
+    demo_large_data: bool | None = None
+
+    @property
+    def load_large_demo(self) -> bool:
+        return self.demo_reset_on_start if self.demo_large_data is None else self.demo_large_data
+
     # ---- Groq (hosted open models, OpenAI-compatible API) ----
     groq_api_key: str | None = None
     groq_base_url: str = "https://api.groq.com/openai/v1"

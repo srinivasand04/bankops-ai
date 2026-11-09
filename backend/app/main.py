@@ -44,6 +44,11 @@ async def lifespan(_: FastAPI):
                 import_bundle_if_empty(db)
     except Exception:  # noqa: BLE001 - ML is optional; the API must still start
         logger.exception("Could not import the pre-trained ML bundle")
+    # Hosted demo: 12 months of history, loaded in the background so the API answers at once
+    if get_settings().load_large_demo:
+        from app.ingestion.demo_large import start_in_background
+
+        start_in_background()
     # The tool always has an administrator and one user per role (also after a demo reset)
     try:
         with SessionLocal() as db:
@@ -124,4 +129,9 @@ app.include_router(ml.router)
 @app.get("/api/health", tags=["Health"])
 def health(db: DbSession):
     db.execute(text("SELECT 1"))
-    return {"status": "ok", "service": settings.app_name, "environment": settings.app_env, "database": "ok"}
+    out = {"status": "ok", "service": settings.app_name, "environment": settings.app_env, "database": "ok"}
+    if get_settings().load_large_demo:
+        from app.ingestion.demo_large import STATE
+
+        out["demo_history"] = STATE.get("state")
+    return out

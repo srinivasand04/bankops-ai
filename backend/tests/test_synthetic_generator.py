@@ -160,3 +160,27 @@ def test_every_application_has_incidents_and_metrics(year):
     generator, data = year
     assert {i.app.code for i in generator.incidents} == set(APP_BY_CODE)
     assert {e["application"] for e in data["operational_events"] if e["event_type"] == "METRIC"} == set(APP_BY_CODE)
+
+
+def test_evidence_days_trims_only_metrics_and_job_runs():
+    from datetime import timedelta
+
+    full = SyntheticGenerator(GeneratorConfig(seed=11, months=2, scale=0.3)).generate()
+    trimmed = SyntheticGenerator(GeneratorConfig(seed=11, months=2, scale=0.3, evidence_days=7)).generate()
+    assert trimmed["incidents"] == full["incidents"] and trimmed["changes"] == full["changes"]
+    assert len(trimmed["operational_events"]) < len(full["operational_events"]) / 3
+    end = SyntheticGenerator(GeneratorConfig(seed=11, months=2, scale=0.3)).cfg.end
+    from app.synthetic.generator import iso
+
+    cutoff = iso(end - timedelta(days=7))
+    old = [e for e in trimmed["operational_events"] if e["event_type"] in ("METRIC", "JOB_RUN") and e["occurred_at"] < cutoff]
+    assert old == []
+    assert any(e["event_type"] == "ALERT" and e["occurred_at"] < cutoff for e in trimmed["operational_events"])
+
+
+def test_large_demo_loads_once(db, monkeypatch):
+    from app.ingestion import demo_large
+
+    first = demo_large.load_large_demo(months=2, scale=0.2, evidence_days=3)
+    assert first["state"] == "DONE" and first["counts"]["incidents"] > 50
+    assert demo_large.load_large_demo(months=2, scale=0.2)["note"] == "already loaded"

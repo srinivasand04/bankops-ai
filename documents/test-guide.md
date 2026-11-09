@@ -25,7 +25,7 @@ Automated checks (optional, about 4 minutes):
 
 ```powershell
 cd D:\Study\BankOps-AI\backend
-.\.venv\Scripts\python.exe -m pytest -q          # expect: 209 passed
+.\.venv\Scripts\python.exe -m pytest -q          # expect: 211 passed
 .\.venv\Scripts\python.exe scripts\smoke_test.py  # expect: every line PASS
 ```
 
