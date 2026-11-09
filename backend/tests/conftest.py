@@ -31,6 +31,7 @@ os.environ.update({
     "OLLAMA_THINK": "false",
     "GROQ_API_KEY": "",
     "AI_DAILY_LIMIT": "0",
+    "AI_AGENT_DAILY_LIMIT": "0",
 })
 get_settings.cache_clear()
 

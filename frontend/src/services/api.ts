@@ -86,6 +86,8 @@ export const aiApi = {
   status: () => data(api.get<AiStatus>("/ai/status")),
   analyze: (incidentId: number, focus?: string) =>
     data(api.post<Investigation>(`/ai/incidents/${incidentId}/analyze`, focus ? { focus } : undefined)),
+  investigate: (incidentId: number, focus?: string) =>
+    data(api.post<Investigation>(`/ai/incidents/${incidentId}/investigate`, focus ? { focus } : undefined)),
   list: (params: Record<string, unknown> = {}) => data(api.get<Investigation[]>("/ai/investigations", { params })),
   forIncident: (incidentId: number) => data(api.get<Investigation[]>(`/ai/incidents/${incidentId}/investigations`)),
   get: (id: number) => data(api.get<Investigation>(`/ai/investigations/${id}`)),

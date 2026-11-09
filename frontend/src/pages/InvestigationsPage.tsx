@@ -2,6 +2,7 @@ import { Bot } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+import { ModePicker, type AnalysisMode } from "../components/AgentTeam";
 import { InvestigationBadge } from "../components/Badges";
 import { Button, Card, Empty, ErrorBanner, Field, inputClass, timeAgo } from "../components/ui";
 import { useApi } from "../hooks/useApi";
@@ -23,6 +24,7 @@ export default function InvestigationsPage({ identity }: { identity: Identity })
   const [filter, setFilter] = useState<"" | InvestigationStatus>("");
   const [incidentId, setIncidentId] = useState("");
   const [focus, setFocus] = useState("");
+  const [mode, setMode] = useState<AnalysisMode>("agents");
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
 
@@ -39,7 +41,8 @@ export default function InvestigationsPage({ identity }: { identity: Identity })
     setStarting(true);
     setError(null);
     try {
-      const inv = await aiApi.analyze(Number(incidentId), focus.trim() || undefined);
+      const run = mode === "agents" ? aiApi.investigate : aiApi.analyze;
+      const inv = await run(Number(incidentId), focus.trim() || undefined);
       navigate(`/investigations/${inv.id}`);
     } catch (err) {
       setError(errorMessage(err));
@@ -67,8 +70,9 @@ export default function InvestigationsPage({ identity }: { identity: Identity })
             <Field label="Question (optional)">
               <input value={focus} onChange={(e) => setFocus(e.target.value)} placeholder="e.g. Was the recent change the cause?" className={inputClass} />
             </Field>
-            <Button onClick={start} disabled={starting || ai.data?.ready === false}>{starting ? "Starting…" : "Run analysis"}</Button>
+            <Button onClick={start} disabled={starting || ai.data?.ready === false}>{starting ? "Starting…" : mode === "agents" ? "Run agent team" : "Run analysis"}</Button>
           </div>
+          <div className="mt-3"><ModePicker mode={mode} onChange={setMode} agentsLeft={ai.data?.agent_runs_left_today} /></div>
           {ai.data && (
             <p className={`mt-3 text-xs ${ai.data.ready ? "text-slate-500" : "text-red-700"}`}>
               Model: {ai.data.provider} / {ai.data.model} ({ai.data.cost}) - {ai.data.detail}
@@ -100,7 +104,7 @@ export default function InvestigationsPage({ identity }: { identity: Identity })
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs uppercase text-slate-500">
               <tr>
-                {["Investigation", "Incident", "Status", "Question", "Model", "Requested by", "Started"].map((h) => (
+                {["Investigation", "Incident", "Status", "Type", "Question", "Model", "Requested by", "Started"].map((h) => (
                   <th key={h} className="whitespace-nowrap px-3 py-2 font-medium">{h}</th>
                 ))}
               </tr>
@@ -115,6 +119,7 @@ export default function InvestigationsPage({ identity }: { identity: Identity })
                     {inv.incident_id ? <Link to={`/incidents/${inv.incident_id}`} className="hover:underline">{inv.incident_reference}</Link> : "-"}
                   </td>
                   <td className="px-3 py-2"><InvestigationBadge status={inv.status} /></td>
+                  <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">{inv.agents_selected.includes("supervisor") ? `Agent team (${inv.agents_selected.length})` : "Single call"}</td>
                   <td className="max-w-xs truncate px-3 py-2 text-slate-600" title={inv.request_text}>{inv.request_text}</td>
                   <td className="whitespace-nowrap px-3 py-2 text-slate-500">{inv.model_name ?? "-"}</td>
                   <td className="whitespace-nowrap px-3 py-2 text-slate-500">{inv.requested_by}</td>

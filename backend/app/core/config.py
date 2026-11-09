@@ -69,6 +69,8 @@ class Settings(BaseSettings):
     ai_provider: Literal["anthropic", "ollama", "groq"] = "anthropic"
     # Public demo guard: maximum AI analyses per UTC day (0 = unlimited)
     ai_daily_limit: int = Field(default=0, ge=0)
+    # Multi-agent runs make 5-7 LLM calls each, so the demo caps them separately (0 = unlimited)
+    ai_agent_daily_limit: int = Field(default=0, ge=0)
 
     # ---- Groq (hosted open models, OpenAI-compatible API) ----
     groq_api_key: str | None = None

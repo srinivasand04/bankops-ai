@@ -20,7 +20,7 @@ added in Phases 4-5.
 | 4 Data Ingestion + Evidence | Standard JSON datasets, 3-layer validation, loader CLI, `data_source` tagging, operational evidence (metrics/logs/alerts) | Done |
 | 5 Claude Integration | Fact base with citable evidence IDs, one structured Claude call, guardrails, human review gate | Done |
 | 6 Frontend workflow UI | Incident list + create form, incident detail (assign, status, timeline, RCA, CAPA), AI investigation centre with live progress and approve/reject, user switcher | Done |
-| 7 Agentic AI | LangGraph supervisor + 5 specialist agents, tools, human review | Next |
+| 7 Agentic AI | LangGraph triage → supervisor → specialists → root cause, 10 read-only tools, per-step audit, human review gate | Done |
 | 8 Real data + wrap-up | BPI 2014 (Rabobank) adapter with a small subset, final tests, demo docs | Planned |
 
 ## Quick start (Windows, PowerShell, Docker Desktop)
@@ -68,7 +68,7 @@ uvicorn app.main:app --reload --port 8000
 
 ```powershell
 cd backend
-.\.venv\Scripts\python.exe -m pytest              # 118 tests against the bankops_test database (AI mocked)
+.\.venv\Scripts\python.exe -m pytest              # 175 tests against the bankops_test database (AI mocked)
 .\.venv\Scripts\python.exe scripts\smoke_test.py  # end-to-end HTTP workflow against a running backend
 ```
 
@@ -163,6 +163,7 @@ BankOps-AI/
 - [Data ingestion pipeline](documents/data-ingestion.md)
 - [Large synthetic dataset for ML](documents/synthetic-data.md)
 - [AI incident analysis](documents/ai-analysis.md)
+- [Multi-agent investigation (LangGraph)](documents/agentic-ai.md)
 - [Database design](documents/database-design.md)
 - [API documentation](documents/api-documentation.md)
 - [Banking concepts](documents/banking-concepts.md)

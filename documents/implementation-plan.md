@@ -42,7 +42,8 @@ Target: two-day MVP, prioritising a working end-to-end incident investigation wo
   root-cause confirm/reject, CAPA), AI investigation centre (start, live progress, report, approve/reject)
 - Demo user switcher (engineer / incident manager / viewer) to show role rules; React, TypeScript, Tailwind, react-router
 
-## Phase 7 - Agentic AI (next)
+## Phase 7 - Agentic AI (done)
+- 7B UI: agent-team view on the investigation page (flow strip, each step's tools, findings, tokens, timing, live while running), IMPACT/RISK score cards, single-call vs agent-team choice when starting
 - LangGraph state, supervisor with conditional routing, five specialist agents
 - Tools over existing services: `get_incident_details`, `get_incident_timeline`, `get_application_health`,
   `get_application_dependencies`, `get_related_changes`, `get_recent_deployments`, `calculate_incident_impact`,

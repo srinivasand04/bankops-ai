@@ -2,6 +2,7 @@ import { ArrowLeft, Bot, Check, X } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
+import { ModePicker, type AnalysisMode } from "../components/AgentTeam";
 import CorrelationCard from "../components/CorrelationCard";
 import { InvestigationBadge, PriorityBadge, SeverityBadge, SlaBadge, SourceBadge, StatusBadge } from "../components/Badges";
 import { Button, Card, Empty, ErrorBanner, Field, formatTime, inputClass, minutesLabel, timeAgo } from "../components/ui";
@@ -208,13 +209,15 @@ function AiCard({ incidentId, canEdit, investigations, setError }: { incidentId:
   const navigate = useNavigate();
   const ai = useApi(aiApi.status);
   const [focus, setFocus] = useState("");
+  const [mode, setMode] = useState<AnalysisMode>("agents");
   const [starting, setStarting] = useState(false);
 
   const start = async () => {
     setStarting(true);
     setError(null);
     try {
-      const inv = await aiApi.analyze(incidentId, focus.trim() || undefined);
+      const run = mode === "agents" ? aiApi.investigate : aiApi.analyze;
+      const inv = await run(incidentId, focus.trim() || undefined);
       navigate(`/investigations/${inv.id}`);
     } catch (err) {
       setError(errorMessage(err));
@@ -233,8 +236,9 @@ function AiCard({ incidentId, canEdit, investigations, setError }: { incidentId:
       {canEdit && (
         <div className="space-y-2">
           <input value={focus} onChange={(e) => setFocus(e.target.value)} placeholder="Question, e.g. Was the last release the cause?" className={inputClass} />
+          <ModePicker mode={mode} onChange={setMode} agentsLeft={ai.data?.agent_runs_left_today} />
           <Button onClick={start} disabled={starting || ai.data?.ready === false} className="w-full">
-            {starting ? "Starting…" : "Analyse with AI"}
+            {starting ? "Starting…" : mode === "agents" ? "Run agent team" : "Analyse with AI"}
           </Button>
           <p className="text-xs text-slate-500">Runs in the background; results wait for a human review.</p>
         </div>

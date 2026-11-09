@@ -2,6 +2,7 @@ import { AlertTriangle, ArrowLeft, Check, Loader2, ShieldCheck, X } from "lucide
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
+import AgentTeam, { isAgentRun } from "../components/AgentTeam";
 import { InvestigationBadge, SeverityBadge } from "../components/Badges";
 import { Button, Card, ErrorBanner, Field, formatTime, inputClass } from "../components/ui";
 import { useApi } from "../hooks/useApi";
@@ -36,11 +37,12 @@ export default function InvestigationDetailPage({ identity }: { identity: Identi
         <p className="mt-1 text-sm text-slate-500">
           Requested by {d.requested_by} · {formatTime(d.created_at)}
           {d.model_name && ` · ${d.model_name}`}
-          {d.executions[0]?.output_tokens != null && ` · ${d.executions[0].input_tokens} in / ${d.executions[0].output_tokens} out tokens`}
+          {isAgentRun(d) ? " · multi-agent investigation" : d.executions[0]?.output_tokens != null && ` · ${d.executions[0].input_tokens} in / ${d.executions[0].output_tokens} out tokens`}
         </p>
       </div>
 
-      {d.status === "RUNNING" && <Running startedAt={d.created_at} />}
+      {d.status === "RUNNING" && !isAgentRun(d) && <Running startedAt={d.created_at} />}
+      {isAgentRun(d) && <AgentTeam inv={d} />}
       {d.status === "FAILED" && <ErrorBanner message={`Analysis failed: ${d.error_message}`} />}
       {d.report && <Report report={d.report} />}
       {d.report && <ReviewPanel investigation={d} identity={identity} onReviewed={inv.reload} />}

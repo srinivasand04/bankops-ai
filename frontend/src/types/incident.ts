@@ -207,6 +207,40 @@ export interface AnalysisReport {
   disclaimer: string;
   context_summary?: Record<string, string | number>;
   applied?: { root_causes: number; actions: number };
+  // multi-agent investigations only
+  mode?: "multi_agent";
+  plan?: { specialists: string[]; reasoning: string | null };
+  agent_findings?: Record<string, AgentFinding>;
+  calculations?: { impact?: Calculation; risk?: Calculation };
+}
+
+export interface AgentFinding {
+  summary: string;
+  findings: { statement: string; evidence_ids: string[] }[];
+  risk_signal: "LOW" | "MEDIUM" | "HIGH";
+  open_questions: string[];
+}
+
+export interface Calculation {
+  id: string;
+  score: number;
+  band: "LOW" | "MEDIUM" | "HIGH";
+  method: string;
+  components?: Record<string, number>;
+  [key: string]: unknown;
+}
+
+export interface AgentExecution {
+  agent_name: string;
+  step_order: number;
+  status: "RUNNING" | "COMPLETED" | "FAILED" | "SKIPPED";
+  tool_calls: { tool: string; ms?: number; result?: Record<string, unknown> }[];
+  output: Record<string, unknown> | null;
+  input_tokens: number | null;
+  output_tokens: number | null;
+  error_message: string | null;
+  started_at: string;
+  completed_at: string | null;
 }
 
 export interface Investigation {
@@ -215,6 +249,7 @@ export interface Investigation {
   incident_reference: string | null;
   status: InvestigationStatus;
   request_text: string;
+  agents_selected: string[];
   model_name: string | null;
   report: AnalysisReport | null;
   error_message: string | null;
@@ -224,14 +259,7 @@ export interface Investigation {
   review_notes: string | null;
   created_at: string;
   completed_at: string | null;
-  executions: {
-    agent_name: string;
-    status: string;
-    input_tokens: number | null;
-    output_tokens: number | null;
-    started_at: string;
-    completed_at: string | null;
-  }[];
+  executions: AgentExecution[];
 }
 
 export interface AiStatus {
@@ -242,4 +270,6 @@ export interface AiStatus {
   cost: string;
   daily_limit: number | null;
   runs_left_today: number | null;
+  agent_daily_limit?: number | null;
+  agent_runs_left_today?: number | null;
 }

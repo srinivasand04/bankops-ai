@@ -109,6 +109,7 @@ class AgentExecutionOut(BaseModel):
     step_order: int
     status: AgentExecutionStatus
     tool_calls: list[dict]
+    output: dict | None = None
     input_tokens: int | None
     output_tokens: int | None
     error_message: str | None
@@ -143,3 +144,5 @@ class AiStatusOut(BaseModel):
     cost: str
     daily_limit: int | None = None
     runs_left_today: int | None = None
+    agent_daily_limit: int | None = None
+    agent_runs_left_today: int | None = None

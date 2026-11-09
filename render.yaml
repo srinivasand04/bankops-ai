@@ -25,6 +25,8 @@ services:
         value: openai/gpt-oss-120b
       - key: AI_DAILY_LIMIT
         value: "25"
+      - key: AI_AGENT_DAILY_LIMIT
+        value: "10"
       - key: DEMO_RESET_ON_START
         value: "true"
       - key: SEED_DEMO_DATA

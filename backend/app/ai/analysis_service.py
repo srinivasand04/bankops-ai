@@ -192,6 +192,26 @@ class AnalysisService:
 
     def start(self, incident_id: int, focus: str | None, user: CurrentUser) -> InvestigationReport:
         """Record a RUNNING investigation and return at once; `run` does the slow AI call."""
+        incident = self.check_can_start(incident_id)
+        now = utcnow()
+        inv = InvestigationReport(
+            incident_id=incident.id,
+            request_text=focus or "Full incident analysis",
+            status=InvestigationStatus.RUNNING,
+            agents_selected=[AGENT_NAME],
+            requested_by=user.username,
+            created_at=now,
+            updated_at=now,
+        )
+        inv.executions.append(
+            AgentExecution(agent_name=AGENT_NAME, step_order=1, status=AgentExecutionStatus.RUNNING, started_at=now)
+        )
+        self.db.add(inv)
+        self.db.commit()
+        return inv
+
+    def check_can_start(self, incident_id: int) -> Incident:
+        """One running analysis per incident, and the demo's daily limit."""
         incident = self.incidents.get(incident_id)
         running = self.db.scalar(
             select(InvestigationReport).where(
@@ -210,22 +230,7 @@ class AnalysisService:
                 f"The demo allows {limit} AI analyses per day - limit reached, try again tomorrow (UTC)",
                 details={"daily_limit": limit},
             )
-        now = utcnow()
-        inv = InvestigationReport(
-            incident_id=incident.id,
-            request_text=focus or "Full incident analysis",
-            status=InvestigationStatus.RUNNING,
-            agents_selected=[AGENT_NAME],
-            requested_by=user.username,
-            created_at=now,
-            updated_at=now,
-        )
-        inv.executions.append(
-            AgentExecution(agent_name=AGENT_NAME, step_order=1, status=AgentExecutionStatus.RUNNING, started_at=now)
-        )
-        self.db.add(inv)
-        self.db.commit()
-        return inv
+        return incident
 
     def run(self, investigation_id: int, llm: LlmClient) -> InvestigationReport:
         inv = self.get(investigation_id)
