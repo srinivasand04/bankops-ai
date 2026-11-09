@@ -42,7 +42,7 @@ def strict_schema(model: type[BaseModel]) -> dict:
     return schema
 
 
-MAX_RETRY_WAIT_SECONDS = 30
+MAX_RETRY_WAIT_SECONDS = 65  # free tier: ~8K tokens/minute, so waits of 30-60 s happen
 
 
 class GroqLlm:
@@ -112,7 +112,7 @@ class GroqLlm:
 
 
     def _post(self, payload: dict) -> httpx.Response:
-        """POST, waiting out short free-tier rate limits (429 + retry-after) instead of failing.
+        """POST, waiting out short free-tier rate limits (429 + retry-after, up to MAX_RETRY_WAIT_SECONDS) instead of failing.
 
         Multi-agent investigations make several calls within seconds, which trips the tokens-per-minute
         limit; Groq says how long to wait, usually a few seconds.
