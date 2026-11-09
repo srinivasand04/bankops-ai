@@ -5,6 +5,8 @@ from app.models.application import Application, ApplicationDependency
 from app.models.base import Base
 from app.models.change import ChangeRecord
 from app.models.evidence import OperationalEvent
+from app.models.ml import MlModelRun, MlPrediction
+from app.models.user import AppUser
 from app.models.incident import (
     Incident,
     IncidentAction,
@@ -18,6 +20,7 @@ from app.models.incident import (
 
 __all__ = [
     "AgentExecution",
+    "AppUser",
     "Application",
     "ApplicationDependency",
     "Base",
@@ -29,6 +32,8 @@ __all__ = [
     "IncidentRelatedChange",
     "IncidentRootCause",
     "IncidentSla",
+    "MlModelRun",
+    "MlPrediction",
     "InvestigationReport",
     "OperationalEvent",
     "incident_reference_seq",

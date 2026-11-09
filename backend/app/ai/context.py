@@ -39,6 +39,7 @@ class IncidentContext:
             "metric_series": len(d["evidence"]["metric_series"]),
             "evidence_events": len(d["evidence"]["events"]),
             "similar_incidents": len(d["similar_incidents"]),
+            "ml_predictions": len(d.get("ml_predictions", [])),
             "citable_ids": len(self.valid_ids),
         }
 
@@ -215,5 +216,33 @@ def build_incident_context(db: Session, incident: Incident, now: datetime | None
             "resolution_summary": other.resolution_summary,
         })
 
+    # ---- machine-learning suggestions (probabilistic evidence) ----------------------------
+    ctx.data["ml_predictions"] = ml_evidence(db, incident.id)
+    ctx.valid_ids.update(p["id"] for p in ctx.data["ml_predictions"])
+
     ctx.data["analysis_time"] = _iso(now)
     return ctx
+
+
+def ml_evidence(db: Session, incident_id: int) -> list[dict]:
+    """Model predictions as citable items (ML-PRED-<id>) with each model's test metrics, so the analyst
+    can weigh them. Empty when no model is trained; ML problems never block an analysis."""
+    try:
+        from app.ml.service import MlService
+
+        predictions = MlService(db).incident_predictions(incident_id)
+    except Exception:  # noqa: BLE001 - optional evidence
+        db.rollback()
+        return []
+    items = []
+    for p in predictions:
+        value = dict(p.prediction)
+        if "similar" in value:
+            value["similar"] = [{k: s[k] for k in ("reference", "application", "title", "similarity")} for s in value["similar"][:3]]
+        model = p.explanation.get("model", {})
+        items.append({
+            "id": f"ML-PRED-{p.id}", "task": model.get("task"), "model": f"{model.get('algorithm')} v{model.get('version')}",
+            "test_metrics": model.get("test_metrics"), "prediction": value,
+            "nature": "statistical estimate from a model trained on past (synthetic) incidents - not an observation",
+        })
+    return items

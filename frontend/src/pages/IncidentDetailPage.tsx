@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { ModePicker, type AnalysisMode } from "../components/AgentTeam";
 import CorrelationCard from "../components/CorrelationCard";
+import MlInsightsCard from "../components/MlInsightsCard";
 import { InvestigationBadge, PriorityBadge, SeverityBadge, SlaBadge, SourceBadge, StatusBadge } from "../components/Badges";
 import { Button, Card, Empty, ErrorBanner, Field, formatTime, inputClass, minutesLabel, timeAgo } from "../components/ui";
 import { useApi } from "../hooks/useApi";
@@ -111,6 +112,7 @@ export default function IncidentDetailPage({ identity }: { identity: Identity })
         <div className="space-y-4">
           <WorkflowCard incident={i} identity={identity} act={act} />
           <SlaCard incident={i} />
+          <MlInsightsCard incidentId={id} />
           <AiCard incidentId={id} canEdit={canEdit} investigations={investigations.data ?? []} setError={setError} />
         </div>
       </div>

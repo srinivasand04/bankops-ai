@@ -53,6 +53,9 @@ services:
       SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    volumes:
+      # trained ML models, shared with `python -m app.ml` on the host and kept across rebuilds
+      - ./backend/ml_artifacts:/app/ml_artifacts
     ports:
       - "8000:8000"
 

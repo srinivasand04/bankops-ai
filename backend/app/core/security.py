@@ -1,7 +1,10 @@
 """Basic, role-aware authentication for the MVP.
 
-Demo mode (AUTH_ENABLED=false): the caller identity comes from optional X-User-Name /
-X-User-Role headers and defaults to a demo incident manager. This is NOT production security.
+Demo mode (AUTH_ENABLED=false): the caller names themselves with X-User-Name. If that name belongs
+to a user stored in app_users, the role comes from the database (X-User-Role is ignored) and a
+deactivated user is refused. Names that are not stored (scripts, tests) still use X-User-Role but
+can never claim ADMIN. With no header the caller is a demo incident manager. No passwords: this is
+NOT production security.
 
 API-key mode (AUTH_ENABLED=true): X-API-Key must match an entry in the API_KEYS setting.
 """
@@ -11,8 +14,11 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 from fastapi import Depends, Header
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
+from app.core.database import get_db
 from app.core.exceptions import AuthenticationError, PermissionDeniedError
 
 
@@ -47,6 +53,7 @@ def get_current_user(
     x_api_key: str | None = Header(default=None),
     x_user_name: str | None = Header(default=None),
     x_user_role: str | None = Header(default=None),
+    db: Session = Depends(get_db),
 ) -> CurrentUser:
     settings = get_settings()
     if settings.auth_enabled:
@@ -61,10 +68,19 @@ def get_current_user(
     if username.startswith(AI_ACTOR_PREFIX):
         # AI identities are assigned internally by the agent runtime, never via headers.
         raise PermissionDeniedError("Reserved user name")
+    from app.models.user import AppUser  # local import: the model module imports Role from here
+
+    stored = db.scalar(select(AppUser).where(AppUser.username == username))
+    if stored is not None:
+        if not stored.is_active:
+            raise PermissionDeniedError(f"User '{username}' is deactivated - ask an administrator")
+        return CurrentUser(username=stored.username, role=stored.role)
     try:
         role = Role((x_user_role or Role.INCIDENT_MANAGER).upper())
     except ValueError as exc:
         raise AuthenticationError(f"Unknown role '{x_user_role}'") from exc
+    if role == Role.ADMIN:
+        raise PermissionDeniedError("Only a user stored by an administrator can be ADMIN")
     return CurrentUser(username=username, role=role)
 
 

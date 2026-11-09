@@ -50,9 +50,19 @@ Target: two-day MVP, prioritising a working end-to-end incident investigation wo
   `calculate_operational_risk`, `get_incident_history`, `create_investigation_report`
 - Human review interrupt and approve/reject endpoint; `agent_executions` per step
 
-## Phase 8 - Real data (BPI 2014) + wrap-up
-- Adapter: raw Rabobank BPI Challenge 2014 CSVs → small curated standard dataset (`datasets/bpi2014`)
-- AI workflow tests, frontend integration, Docker validation, demo script
+## Phase 8 - Real data (BPI 2014) (done)
+- Adapter `app/ingestion/bpi2014.py` + `scripts/bpi2014_to_dataset.py`: raw Rabobank CSVs → 300 incidents, 130 changes,
+  6 applications, loaded through the normal 3-layer validation ([bpi2014.md](bpi2014.md))
+
+## ML module (done)
+- Phase 1: seeded large synthetic dataset generator ([synthetic-data.md](synthetic-data.md))
+- Phases 2-5: features without leakage, time-based splits, model registry (joblib + `ml_model_runs`), 8 tasks,
+  predictions as `ML-PRED` evidence for the AI, ML Lab and ML insights UI, pre-trained bundle for the hosted demo
+  ([ml.md](ml.md))
+
+## Management reports, users and languages (done)
+- Reports tab: scorecard with RAG, SLA performance, trends, change risk, problem management; print / PDF and CSV
+- Users and roles in the database with an admin screen; English / French across every screen
 
 ## Known limitations / backlog
 - SLA clock does not pause while ON_HOLD

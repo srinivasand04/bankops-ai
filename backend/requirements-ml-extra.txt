@@ -1,0 +1,5 @@
+# Optional: extra gradient-boosting libraries for the SLA-breach comparison (python -m app.ml train).
+# Not in the Docker image - they roughly double its size and the hosted demo uses the pre-trained bundle.
+#   pip install -r requirements-ml-extra.txt
+xgboost==3.4.1
+lightgbm==4.7.0

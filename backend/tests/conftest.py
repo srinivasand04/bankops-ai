@@ -32,6 +32,7 @@ os.environ.update({
     "GROQ_API_KEY": "",
     "AI_DAILY_LIMIT": "0",
     "AI_AGENT_DAILY_LIMIT": "0",
+    "ML_BUNDLE_AUTOLOAD": "false",
 })
 get_settings.cache_clear()
 

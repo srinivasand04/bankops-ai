@@ -14,10 +14,12 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.ai.analysis_service import AnalysisService
 from app.api.deps import DbSession
-from app.api.routes import ai, analytics, applications, evidence, incidents, rca, reports
+from app.api.routes import ai, analytics, applications, evidence, incidents, ml, rca, reports, users
 from app.core.config import get_settings
 from app.core.exceptions import DomainError
+from app.core.database import SessionLocal
 from app.core.logging import configure_logging
+from app.services.user_service import ensure_default_users
 
 settings = get_settings()
 configure_logging(settings.log_level)
@@ -33,6 +35,22 @@ async def lifespan(_: FastAPI):
             logger.warning("Marked %s interrupted AI analyses as FAILED", interrupted)
     except SQLAlchemyError:
         logger.exception("Could not check for interrupted AI analyses")
+    # Pre-trained ML models for databases that have none yet (the hosted demo)
+    try:
+        from app.ml.bundle import import_bundle_if_empty
+
+        if get_settings().ml_bundle_autoload:
+            with SessionLocal() as db:
+                import_bundle_if_empty(db)
+    except Exception:  # noqa: BLE001 - ML is optional; the API must still start
+        logger.exception("Could not import the pre-trained ML bundle")
+    # The tool always has an administrator and one user per role (also after a demo reset)
+    try:
+        with SessionLocal() as db:
+            if created := ensure_default_users(db):
+                logger.info("Created %s default users", created)
+    except SQLAlchemyError:
+        logger.exception("Could not create the default users")
     yield
 
 
@@ -99,6 +117,8 @@ app.include_router(applications.router)
 app.include_router(evidence.router)
 app.include_router(ai.router)
 app.include_router(reports.router)
+app.include_router(users.router)
+app.include_router(ml.router)
 
 
 @app.get("/api/health", tags=["Health"])

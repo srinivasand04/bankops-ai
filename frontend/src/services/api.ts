@@ -15,6 +15,7 @@ import type {
   RootCause,
   TimelineEvent,
 } from "../types/incident";
+import type { MlPrediction, MlRun, MlTask, ScoredChange } from "../types/ml";
 import type { ManagementPack } from "../types/reports";
 import { getIdentity } from "./identity";
 
@@ -99,6 +100,32 @@ export const aiApi = {
 export const reportsApi = {
   // Building all five reports takes a few seconds on a large dataset
   managementPack: (days: number) => data(api.get<ManagementPack>("/reports/management-pack", { params: { days }, timeout: 60000 })),
+};
+
+export interface AppUser {
+  id: number;
+  username: string;
+  full_name: string;
+  email: string | null;
+  role: import("../types/incident").Role;
+  team: string | null;
+  is_active: boolean;
+  created_by: string;
+}
+
+export const usersApi = {
+  list: (includeInactive = true) => data(api.get<AppUser[]>("/users", { params: { include_inactive: includeInactive } })),
+  create: (body: Omit<AppUser, "id" | "is_active" | "created_by">) => data(api.post<AppUser>("/users", body)),
+  update: (id: number, body: Partial<Omit<AppUser, "id" | "username" | "created_by">>) => data(api.patch<AppUser>(`/users/${id}`, body)),
+};
+
+export const mlApi = {
+  tasks: () => data(api.get<MlTask[]>("/ml/tasks")),
+  runs: (task?: string) => data(api.get<MlRun[]>("/ml/runs", { params: { task } })),
+  train: (tasks: string[] | "all") => data(api.post<{ queued: string[] }>("/ml/train", { tasks })),
+  incidentPredictions: (id: number, refresh = false) =>
+    data(api.get<MlPrediction[]>(`/ml/incidents/${id}/predictions`, { params: { refresh }, timeout: 60000 })),
+  changes: (limit = 15) => data(api.get<ScoredChange[]>("/ml/changes", { params: { limit }, timeout: 60000 })),
 };
 
 export const healthApi = {

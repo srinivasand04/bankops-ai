@@ -13,9 +13,11 @@ COPY alembic.ini .
 COPY alembic ./alembic
 COPY app ./app
 COPY datasets ./datasets
+COPY ml_bundle ./ml_bundle
 COPY docker-entrypoint.sh .
 RUN sed -i 's/\r$//' docker-entrypoint.sh && chmod +x docker-entrypoint.sh \
-    && useradd --create-home --uid 1000 bankops
+    && useradd --create-home --uid 1000 bankops \
+    && mkdir -p /app/ml_artifacts && chown bankops /app/ml_artifacts
 USER bankops
 
 EXPOSE 8000

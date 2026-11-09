@@ -16,6 +16,11 @@ class NotFoundError(DomainError):
     code = "not_found"
 
 
+class ConflictError(DomainError):
+    status_code = 409
+    code = "conflict"
+
+
 class InvalidTransitionError(DomainError):
     status_code = 409
     code = "invalid_status_transition"

@@ -2,7 +2,7 @@ from datetime import datetime
 from math import ceil
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, BackgroundTasks, Query, status
 
 from app.api import serializers
 from app.api.deps import AnyUser, DbSession, Engineer
@@ -36,9 +36,21 @@ def _detail(service: IncidentService, incident) -> IncidentDetailOut:
 
 
 @router.post("", response_model=IncidentDetailOut, status_code=status.HTTP_201_CREATED)
-def create_incident(payload: IncidentCreate, db: DbSession, user: Engineer):
+def create_incident(payload: IncidentCreate, db: DbSession, user: Engineer, background: BackgroundTasks):
     service = IncidentService(db)
-    return _detail(service, service.create(payload, user))
+    incident = service.create(payload, user)
+    # Model suggestions (SLA-breach risk, MTTR, category/team, similar incidents) are stored in the
+    # background; they never change the incident itself.
+    background.add_task(_store_ml_predictions, incident.id)
+    return _detail(service, incident)
+
+
+def _store_ml_predictions(incident_id: int) -> None:
+    from app.core.database import SessionLocal
+    from app.ml.service import predict_new_incident
+
+    with SessionLocal() as db:
+        predict_new_incident(db, incident_id)
 
 
 @router.get("", response_model=Page[IncidentOut])

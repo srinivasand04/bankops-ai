@@ -1,5 +1,5 @@
-// Demo identity (backend AUTH_ENABLED=false): the API reads X-User-Name / X-User-Role headers.
-// Switching user in the header lets you show who may do what (engineers cannot approve AI output).
+// Who is using the tool (demo mode: no passwords). The API reads X-User-Name; for users stored by an
+// administrator the role always comes from the database, so the role kept here is only for the UI.
 import type { Role } from "../types/incident";
 
 export interface Identity {
@@ -8,23 +8,18 @@ export interface Identity {
   label: string;
 }
 
-export const DEMO_USERS: Identity[] = [
-  { name: "engineer", role: "ENGINEER", label: "Engineer" },
-  { name: "incident.manager", role: "INCIDENT_MANAGER", label: "Incident manager" },
-  { name: "risk.viewer", role: "VIEWER", label: "Viewer (read only)" },
-];
+export const DEFAULT_IDENTITY: Identity = { name: "srinivasan.d", role: "ADMIN", label: "Srinivasan Dhakshanamoorthy" };
 
 const KEY = "bankops.identity";
 
 export function loadIdentity(): Identity {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) ?? "null") as Identity | null;
-    const known = DEMO_USERS.find((u) => u.name === saved?.name);
-    if (known) return known;
+    if (saved?.name && saved.role) return saved;
   } catch {
     // storage unavailable (private window) - fall back to the default user
   }
-  return DEMO_USERS[1];
+  return DEFAULT_IDENTITY;
 }
 
 export function saveIdentity(identity: Identity): void {

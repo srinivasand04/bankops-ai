@@ -72,6 +72,12 @@ class Settings(BaseSettings):
     # Multi-agent runs make 5-7 LLM calls each, so the demo caps them separately (0 = unlimited)
     ai_agent_daily_limit: int = Field(default=0, ge=0)
 
+    # ---- Machine learning ----
+    # Trained models (joblib). A Docker volume locally; the hosted demo ships a pre-trained bundle.
+    ml_artifacts_dir: str = "ml_artifacts"
+    # Load backend/ml_bundle into an empty ml_model_runs table at startup (off in the test suite)
+    ml_bundle_autoload: bool = True
+
     # ---- Groq (hosted open models, OpenAI-compatible API) ----
     groq_api_key: str | None = None
     groq_base_url: str = "https://api.groq.com/openai/v1"

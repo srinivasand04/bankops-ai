@@ -57,6 +57,21 @@ All four sign up with your GitHub account. Secrets are pasted only into each ser
 - The first visit after idle shows "Waking up the demo server" for up to a minute.
 - Run an analysis on INC-1012 (see the [user guide](user-guide.md)); with Groq it takes seconds.
 - The AI card shows how many demo analyses are left today.
+- ML Lab and the *ML insights* card work from the shipped model bundle (`backend/ml_bundle`, about 15 MB),
+  loaded into the empty database at startup. After retraining locally, run `python -m app.ml export-bundle`
+  and commit `backend/ml_bundle` to update the hosted models.
+
+## After the first deployment: settings Render does not pick up by itself
+
+A Blueprint's environment variables are only read when the service is created. Variables added to
+`render.yaml` later must be added in the Render dashboard (service, then Environment):
+
+| Variable | Value | Why |
+|---|---|---|
+| `AI_AGENT_DAILY_LIMIT` | `10` | Caps multi-agent investigations (each makes 3-6 AI calls); they also count towards `AI_DAILY_LIMIT` |
+
+The image is about 1 GB with the ML libraries (it was about 450 MB before). It fits Render's free plan;
+the API uses about 260 MB of memory with every model loaded.
 
 ## Public-demo safeguards
 
@@ -64,7 +79,8 @@ All four sign up with your GitHub account. Secrets are pasted only into each ser
 |---|---|
 | Visitors use up the free AI quota | `AI_DAILY_LIMIT` (25/day in `render.yaml`); Groq's own per-minute limit returns a clear "try again shortly" |
 | Visitors leave junk data | demo data resets on every server start (free Render restarts after idle) |
-| Anyone can act as the manager | intended for the demo: the "Acting as" switcher shows the role rules; `AUTH_ENABLED=true` with `API_KEYS` turns on API-key auth |
+| Anyone can act as any stored user | intended for the demo (no passwords): roles come from the database, so the browser cannot raise its own role, and unknown names can never be ADMIN; `AUTH_ENABLED=true` with `API_KEYS` turns on API-key auth |
+| Users added on the demo | they disappear at the next restart (demo reset); the default users are re-created automatically |
 | Real data exposure | the hosted demo only ever contains synthetic data |
 
 This is a showcase deployment, not a production setup: there is no SSO, the demo identity is chosen by the visitor,

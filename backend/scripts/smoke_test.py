@@ -95,6 +95,27 @@ def main() -> None:
     summary = api.get("/analytics/incident-summary", headers=ENGINEER).json()
     check(summary["total_incidents"] >= 11, f"analytics summary: {summary['total_incidents']} incidents, "
           f"MTTR {summary['mttr_minutes']} min, SLA compliance {summary['sla_compliance_pct']}%")
+
+    pack = api.get("/reports/management-pack?days=90", headers=ENGINEER, timeout=60).json()
+    check(pack["scorecard"]["totals"]["applications"] >= 5, f"management report: {pack['scorecard']['totals']['incidents']} incidents, "
+          f"RAG {pack['scorecard']['totals']['rag']}")
+
+    users = api.get("/users", headers=ENGINEER).json()
+    check(any(u["role"] == "ADMIN" and u["is_active"] for u in users), f"{len(users)} users, an active administrator exists")
+    check(api.get("/users/me", headers={"X-User-Name": "intruder", "X-User-Role": "ADMIN"}).status_code == 403,
+          "unknown user cannot claim ADMIN (403)")
+
+    agents = [a["name"] for a in api.get("/ai/agents", headers=ENGINEER).json()]
+    check(agents[0] == "triage" and agents[-1] == "root_cause", f"agent team: {' -> '.join(agents)}")
+
+    tasks = api.get("/ml/tasks", headers=ENGINEER).json()
+    trained = [t["task"] for t in tasks if t["active"]]
+    if trained:
+        preds = api.get(f"/ml/incidents/{iid}/predictions", headers=ENGINEER, timeout=60).json()
+        check(bool(preds) and all(p["evidence_id"].startswith("ML-PRED-") for p in preds),
+              f"{len(trained)} ML models trained; incident predictions: {', '.join(p['task'] for p in preds)}")
+    else:
+        print("  [SKIP] ML models not trained (python -m app.ml train-all)")
     print("Smoke test completed successfully.")
 
 
