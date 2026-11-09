@@ -82,7 +82,18 @@ def load_artifact(run: MlModelRun) -> dict | None:
     if run.artifact not in _cache:
         path = artifacts_dir() / run.artifact
         if not path.exists():
-            logger.warning("ML artifact missing: %s", path)
-            return None
+            # Self-healing: the run is in the database but this server's disk lacks the file (e.g. a new
+            # container during a hosted redeploy). Restore it from the bundle shipped in the image.
+            from app.ml.bundle import BUNDLE_DIR
+
+            shipped = BUNDLE_DIR / run.artifact
+            if shipped.exists():
+                import shutil
+
+                shutil.copy2(shipped, path)
+                logger.info("ML artifact restored from the bundle: %s", run.artifact)
+            else:
+                logger.warning("ML artifact missing: %s", path)
+                return None
         _cache[run.artifact] = joblib.load(path)
     return _cache[run.artifact]

@@ -132,3 +132,20 @@ def test_hosted_demo_uses_the_pretrained_bundle(client, db, seeded, artifacts):
     assert {"sla_breach", "mttr", "routing", "similar"} <= {p["task"] for p in preds}
     similar = next(p for p in preds if p["task"] == "similar")["prediction"]["similar"]
     assert similar, "demo incidents are embedded on first use"
+
+
+def test_missing_model_file_is_restored_from_bundle(client, db, seeded, artifacts):
+    """A server whose disk lacks the model files (hosted redeploy) restores them from the shipped bundle."""
+    from app.ml.bundle import BUNDLE_DIR, import_bundle_if_empty
+    from app.ml.registry import _cache
+
+    if not (BUNDLE_DIR / "runs.json").exists():
+        pytest.skip("no bundle exported")
+    import_bundle_if_empty(db)
+    for f in artifacts.glob("*.joblib"):
+        f.unlink()
+    _cache.clear()
+    inc = db.query(Incident).filter_by(reference_number="INC-1007").one()
+    preds = client.get(f"/api/ml/incidents/{inc.id}/predictions", headers=headers()).json()
+    assert {"sla_breach", "routing"} <= {p["task"] for p in preds}
+    assert any(artifacts.glob("*.joblib"))
