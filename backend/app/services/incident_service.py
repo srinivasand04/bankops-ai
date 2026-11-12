@@ -18,8 +18,7 @@ from app.models.enums import (
 from app.repositories.application_repository import ApplicationRepository
 from app.repositories.incident_repository import IncidentFilters, IncidentRepository
 from app.schemas.incident import AssignmentChange, EventCreate, IncidentCreate, IncidentUpdate, StatusChange
-from app.services import lifecycle, sla_service
-from app.services.classification import derive_priority
+from app.services import business_calendar, lifecycle, sla_service
 from app.services.timeline import record_event
 from app.utils.time import utcnow
 
@@ -71,7 +70,13 @@ class IncidentService:
             raise BusinessRuleError(f"Application {data.application_id} does not exist or is inactive")
 
         now = utcnow()
-        priority = data.priority or derive_priority(data.severity, application.business_criticality)
+        started_at = data.started_at or now
+        decision = business_calendar.priority_for(self.db, data.severity, application, started_at)
+        if data.priority:
+            priority = data.priority
+            priority_reason = f"Set manually by {user.username} (calculated: {decision.priority})"
+        else:
+            priority, priority_reason = decision.priority, decision.reason
         incident = Incident(
             reference_number=self.incidents.next_reference(),
             title=data.title,
@@ -79,11 +84,12 @@ class IncidentService:
             application=application,
             severity=data.severity,
             priority=priority,
+            priority_reason=priority_reason,
             category=data.category,
             status=IncidentStatus.OPEN,
             business_impact=data.business_impact,
             created_by=user.username,
-            started_at=data.started_at or now,
+            started_at=started_at,
             created_at=now,
             updated_at=now,
         )
@@ -93,7 +99,13 @@ class IncidentService:
             EventType.CREATED,
             f"Incident created: {data.severity} {data.category} on {application.name}",
             user,
-            details={"severity": data.severity, "priority": priority, "priority_derived": data.priority is None},
+            details={
+                "severity": data.severity,
+                "priority": priority,
+                "priority_derived": data.priority is None,
+                "priority_reason": priority_reason,
+                "calendar_period_ids": decision.calendar_period_ids,
+            },
             at=now,
         )
         self.db.add(incident)
@@ -133,10 +145,11 @@ class IncidentService:
         if new_priority and new_priority != incident.priority:
             old = incident.priority
             incident.priority = new_priority
+            incident.priority_reason = f"Set manually by {user.username}" + (f": {reason}" if reason else "")
             record_event(
                 incident,
                 EventType.PRIORITY_CHANGED,
-                f"Priority changed from {old} to {new_priority}",
+                f"Priority changed from {old} to {new_priority}" + (f": {reason}" if reason else ""),
                 user,
                 details={"from": old, "to": new_priority},
             )

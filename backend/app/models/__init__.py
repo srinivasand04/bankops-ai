@@ -3,6 +3,7 @@
 from app.models.ai import AgentExecution, InvestigationReport
 from app.models.application import Application, ApplicationDependency
 from app.models.base import Base
+from app.models.calendar import BusinessCalendarPeriod
 from app.models.change import ChangeRecord
 from app.models.evidence import OperationalEvent
 from app.models.ml import MlModelRun, MlPrediction
@@ -24,6 +25,7 @@ __all__ = [
     "Application",
     "ApplicationDependency",
     "Base",
+    "BusinessCalendarPeriod",
     "ChangeRecord",
     "Incident",
     "IncidentAction",

@@ -33,8 +33,9 @@ DEPENDENCY_IMPACT = AgentSpec(
 )
 OPERATIONAL_RISK = AgentSpec(
     "operational_risk", "Operational risk agent",
-    "Assess operational risk: change risk, recurrence on the application, SLA exposure and history.",
-    ("calculate_operational_risk", "get_incident_history"),
+    "Assess operational risk: change risk, recurrence on the application, SLA exposure, history and "
+    "business-calendar timing (month-end close, payroll, regulatory deadlines).",
+    ("calculate_operational_risk", "get_incident_history", "get_business_calendar"),
 )
 ROOT_CAUSE = AgentSpec(
     "root_cause", "Root cause agent",

@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { ModePicker, type AnalysisMode } from "../components/AgentTeam";
 import CorrelationCard from "../components/CorrelationCard";
 import MlInsightsCard from "../components/MlInsightsCard";
+import PriorityReason from "../components/PriorityReason";
 import { InvestigationBadge, PriorityBadge, SeverityBadge, SlaBadge, SourceBadge, StatusBadge } from "../components/Badges";
 import { Button, Card, Empty, ErrorBanner, Field, formatTime, inputClass, minutesLabel, timeAgo } from "../components/ui";
 import { useApi } from "../hooks/useApi";
@@ -69,6 +70,7 @@ export default function IncidentDetailPage({ identity }: { identity: Identity })
           {i.sla?.is_breached && <span className="text-xs font-semibold text-red-700">{t("det.slaBreached")}</span>}
         </div>
         <h1 className="mt-2 text-xl font-semibold text-navy-900">{i.title}</h1>
+        <PriorityReason reason={i.priority_reason} />
         <div className="mt-2 grid gap-1 text-sm text-slate-600 sm:grid-cols-2 lg:grid-cols-4">
           <span>{t("det.application")} <b className="font-medium text-slate-800">{i.application.code} - {i.application_name}</b></span>
           <span>{t("det.category")} {label(i.category)}</span>

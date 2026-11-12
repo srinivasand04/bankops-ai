@@ -1,5 +1,6 @@
 import axios from "axios";
 
+import type { ActiveCalendar, CalendarPeriod, CalendarPeriodInput } from "../types/calendar";
 import type {
   AiStatus,
   Application,
@@ -130,4 +131,13 @@ export const mlApi = {
 
 export const healthApi = {
   check: () => data(api.get<{ status: string; database: string }>("/health")),
+};
+
+export const calendarApi = {
+  list: (params: { start?: string; end?: string; application?: string; period_type?: string[] } = {}) =>
+    data(api.get<CalendarPeriod[]>("/business-calendar", { params, paramsSerializer: { indexes: null } })),
+  active: (applicationId: number, severity?: string) =>
+    data(api.get<ActiveCalendar>("/business-calendar/active", { params: { application_id: applicationId, severity } })),
+  create: (body: CalendarPeriodInput) => data(api.post<CalendarPeriod>("/business-calendar", body)),
+  remove: (id: number) => api.delete(`/business-calendar/${id}`),
 };

@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout";
 import ServerGate from "./components/ServerGate";
 import ArchitecturePage from "./pages/ArchitecturePage";
+import CalendarPage from "./pages/CalendarPage";
 import DashboardPage from "./pages/DashboardPage";
 import IncidentDetailPage from "./pages/IncidentDetailPage";
 import IncidentsPage from "./pages/IncidentsPage";
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="/incidents/:id" element={<IncidentDetailPage identity={identity} />} />
             <Route path="/investigations" element={<InvestigationsPage identity={identity} />} />
             <Route path="/investigations/:id" element={<InvestigationDetailPage identity={identity} />} />
+            <Route path="/calendar" element={<CalendarPage identity={identity} />} />
             <Route path="/reports" element={<Suspense fallback={null}><ReportsPage /></Suspense>} />
             <Route path="/ml" element={<Suspense fallback={null}><MlLabPage identity={identity} /></Suspense>} />
             <Route path="/users" element={<UsersPage identity={identity} onUsersChanged={() => setUsersVersion((v) => v + 1)} />} />

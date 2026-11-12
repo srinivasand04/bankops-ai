@@ -140,6 +140,18 @@ class BusinessCriticality(StrEnum):
     TIER_3 = "TIER_3"
 
 
+class CalendarPeriodType(StrEnum):
+    """Business-calendar periods during which the same incident has a bigger business impact."""
+
+    MONTH_END_CLOSE = "MONTH_END_CLOSE"
+    QUARTER_END_CLOSE = "QUARTER_END_CLOSE"
+    YEAR_END_CLOSE = "YEAR_END_CLOSE"
+    PAYROLL = "PAYROLL"
+    REGULATORY_DEADLINE = "REGULATORY_DEADLINE"
+    PEAK_PERIOD = "PEAK_PERIOD"
+    BANK_HOLIDAY = "BANK_HOLIDAY"  # context only by default: fewer staff, payment systems closed
+
+
 class HealthStatus(StrEnum):
     HEALTHY = "HEALTHY"
     DEGRADED = "DEGRADED"

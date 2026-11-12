@@ -26,6 +26,9 @@ added in Phases 4-5.
 | Reports | 5 management reports across all applications, print to PDF, CSV | Done |
 | Users & roles | Users stored in the database (role never trusted from the browser), admin screen, lock-out protection | Done |
 | EN / FR | Every screen in English and French | Done |
+| Business calendar A | Calendar table, priority +1 in month-end / quarter-end / year-end close, payroll, regulatory deadlines and peaks; bank holidays as context only; priority reason; API; demo calendar | Done |
+| Business calendar B | Calendar periods as citable AI evidence (`CAL-…`) for the analysis and the agents | Done |
+| Business calendar C | Priority reason on the incident page and a calendar screen (EN / FR) | Done |
 
 ## Quick start (Windows, PowerShell, Docker Desktop)
 
@@ -66,6 +69,7 @@ py -3.12 -m venv .venv
 pip install -r requirements-dev.txt
 docker compose up -d db             # from the project root
 alembic upgrade head
+python -m app.ingestion calendar                  # demo business calendar (before loading incidents)
 python -m app.ingestion load datasets/synthetic   # --replace to reload; see documents/data-ingestion.md
 uvicorn app.main:app --reload --port 8000
 ```
@@ -74,13 +78,38 @@ uvicorn app.main:app --reload --port 8000
 
 ```powershell
 cd backend
-.\.venv\Scripts\python.exe -m pytest              # 211 tests against the bankops_test database (AI mocked)
+.\.venv\Scripts\python.exe -m pytest              # 231 tests against the bankops_test database (AI mocked)
 .\.venv\Scripts\python.exe scripts\smoke_test.py  # end-to-end HTTP workflow against a running backend
 ```
 
 Tests run against a separate `bankops_test` database (created by `docker/postgres/init`), which is
 migrated with Alembic at the start of the session and truncated between tests. The suite refuses to
 run if `TEST_DATABASE_URL` does not point at a database ending in `_test`.
+
+## Business calendar prioritisation
+
+The same incident means more on day 2 of month-end close than on a quiet Tuesday. Priority is
+calculated in three steps (`backend/app/services/classification.py`):
+
+1. Severity gives the base priority (P1 CRITICAL, P2 HIGH, P3 MEDIUM, P4 LOW).
+2. Application tier: Tier 1 +1 level, Tier 3 -1 level (not for P1).
+3. Business calendar: +1 level once if the incident starts in a sensitive period for that application
+   (month-end / quarter-end / year-end close, salary payment run, COREP/FINREP deadline, Black Friday).
+   Bank holidays are **context only** (no change).
+
+Severity and SLA targets never change. Each incident stores `priority_reason`, for example
+`P3 base priority MEDIUM · Tier 1 application +1 -> HIGH · Business calendar (Month-end close Nov 2026, day 2) +1 -> CRITICAL`.
+A priority set by a person is kept and the reason says who set it.
+
+The demo calendar (`python -m app.ingestion calendar`) uses French working days and is tagged
+`SYNTHETIC`: it is a demonstration, not a real bank's calendar. Admins can add, change or delete periods
+with `/api/business-calendar`; `/api/business-calendar/active?application_id=..&severity=P3` previews
+the priority a new incident would get now.
+
+The **Business calendar** screen lists the periods (active ones highlighted) and lets an admin add or
+remove one; the incident page shows the priority reason. The AI analysis and the operational-risk
+agent see the overlapping periods as citable `CAL-<id>` evidence (`get_business_calendar` tool): they
+use them for business impact and escalation, never as a root cause.
 
 ## Management reports
 

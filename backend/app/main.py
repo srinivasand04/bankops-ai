@@ -14,7 +14,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.ai.analysis_service import AnalysisService
 from app.api.deps import DbSession
-from app.api.routes import ai, analytics, applications, evidence, incidents, ml, rca, reports, users
+from app.api.routes import ai, analytics, applications, calendar, evidence, incidents, ml, rca, reports, users
 from app.core.config import get_settings
 from app.core.exceptions import DomainError
 from app.core.database import SessionLocal
@@ -119,6 +119,7 @@ app.include_router(incidents.router)
 app.include_router(rca.router)
 app.include_router(analytics.router)
 app.include_router(applications.router)
+app.include_router(calendar.router)
 app.include_router(evidence.router)
 app.include_router(ai.router)
 app.include_router(reports.router)

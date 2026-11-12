@@ -32,7 +32,7 @@ from app.models import (
 )
 from app.models.enums import ActionStatus, ActionType, EventType, IncidentStatus, RcaStatus, Source
 from app.services import lifecycle, sla_service
-from app.services.classification import derive_priority
+from app.services.business_calendar import CalendarIndex, priority_for
 from app.services.timeline import record_event
 from app.utils.time import utcnow
 
@@ -162,6 +162,8 @@ class _Loader:
         # Oldest first so generated references follow creation order
         ordered = sorted(self.ds.incidents, key=lambda r: self.at(r.created_at))
         self._reserve_references(sum(1 for r in ordered if not r.reference))
+        starts = [self.at(r.started_at) for r in ordered]
+        self.calendar = CalendarIndex.load(self.db, min(starts), max(starts)) if starts else CalendarIndex([])
         for n, record in enumerate(ordered, start=1):
             self._incident(record)
             if n % FLUSH_EVERY == 0:  # one round trip per batch, not per incident
@@ -258,10 +260,16 @@ class _Loader:
     def _incident(self, record: IncidentIn) -> None:
         app = self.apps[record.application]
         created_at = self.at(record.created_at)
+        started_at = self.at(record.started_at)
 
         def offset(minutes: float) -> datetime:
             return created_at + timedelta(minutes=minutes)
 
+        if record.priority:
+            priority, priority_reason = record.priority, f"Provided by source {self.source}"
+        else:
+            decision = priority_for(self.db, record.severity, app, started_at, self.calendar)
+            priority, priority_reason = decision.priority, decision.reason
         incident = Incident(
             reference_number=record.reference or f"INC-{next(self._references)}",
             external_id=record.external_id,
@@ -270,13 +278,14 @@ class _Loader:
             description=record.description,
             application=app,
             severity=record.severity,
-            priority=record.priority or derive_priority(record.severity, app.business_criticality),
+            priority=priority,
+            priority_reason=priority_reason,
             category=record.category,
             status=IncidentStatus.OPEN,
             reopen_count=0,  # column default applies only at INSERT; histories may reopen before that
             business_impact=record.business_impact,
             created_by=record.created_by,
-            started_at=self.at(record.started_at),
+            started_at=started_at,
             created_at=created_at,
             updated_at=created_at,
         )

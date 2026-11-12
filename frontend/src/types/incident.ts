@@ -63,6 +63,8 @@ export interface Incident {
   application_name: string;
   severity: Severity;
   priority: Priority;
+  /** Why the incident has this priority (severity, tier, business calendar or a manual change). */
+  priority_reason: string | null;
   category: string;
   status: IncidentStatus;
   assigned_team: string | null;

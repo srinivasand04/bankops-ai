@@ -55,6 +55,8 @@ class Incident(DataSourceMixin, TimestampMixin, Base):
     application_id: Mapped[int] = mapped_column(ForeignKey("applications.id"), index=True)
     severity: Mapped[Severity] = mapped_column(str_enum(Severity, "severity"))
     priority: Mapped[Priority] = mapped_column(str_enum(Priority, "priority"))
+    # Why the priority is what it is (tier and business-calendar adjustments, or who set it manually)
+    priority_reason: Mapped[str | None] = mapped_column(Text)
     category: Mapped[IncidentCategory] = mapped_column(str_enum(IncidentCategory, "incident_category"), index=True)
     status: Mapped[IncidentStatus] = mapped_column(
         str_enum(IncidentStatus, "incident_status"), default=IncidentStatus.OPEN

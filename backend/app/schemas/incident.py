@@ -99,6 +99,7 @@ class IncidentOut(OrmModel):
     application_name: str
     severity: Severity
     priority: Priority
+    priority_reason: str | None
     category: IncidentCategory
     status: IncidentStatus
     assigned_team: str | None

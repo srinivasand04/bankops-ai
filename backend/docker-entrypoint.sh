@@ -11,6 +11,8 @@ if [ "${DEMO_RESET_ON_START:-false}" = "true" ]; then
 fi
 
 if [ "${SEED_DEMO_DATA:-true}" = "true" ]; then
+  # Business calendar first, so demo incidents get calendar-aware priorities when they are loaded.
+  python -m app.ingestion calendar || echo "WARNING: demo business calendar was not loaded (see error above)"
   # Loads the synthetic dataset unless it is already present.
   # A demo-data problem should not stop the API from serving.
   python -m app.ingestion load datasets/synthetic || echo "WARNING: synthetic dataset was not loaded (see error above)"

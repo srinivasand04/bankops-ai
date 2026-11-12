@@ -1,4 +1,4 @@
-import { BarChart3, Bot, FlaskConical, LayoutDashboard, Landmark, ListChecks, Network, UserRound, Users } from "lucide-react";
+import { BarChart3, Bot, CalendarDays, FlaskConical, LayoutDashboard, Landmark, ListChecks, Network, UserRound, Users } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 
@@ -16,6 +16,7 @@ const NAV: { to: string; label: MessageKey; icon: typeof Bot; end: boolean }[] =
   { to: "/", label: "nav.dashboard", icon: LayoutDashboard, end: true },
   { to: "/incidents", label: "nav.incidents", icon: ListChecks, end: false },
   { to: "/investigations", label: "nav.investigations", icon: Bot, end: false },
+  { to: "/calendar", label: "nav.calendar", icon: CalendarDays, end: false },
   { to: "/reports", label: "nav.reports", icon: BarChart3, end: false },
   { to: "/ml", label: "nav.ml", icon: FlaskConical, end: false },
   { to: "/users", label: "nav.users", icon: Users, end: false },

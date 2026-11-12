@@ -4,6 +4,8 @@
     python -m app.ingestion load datasets/synthetic            # load (skips if the source is already loaded)
     python -m app.ingestion load datasets/synthetic --replace  # reload that source only
     python -m app.ingestion sources                            # row counts per data source
+    python -m app.ingestion calendar                           # demo business calendar (last, this, next year)
+    python -m app.ingestion calendar --replace                 # regenerate the demo business calendar
     python -m app.ingestion reset --yes                        # wipe ALL data (development only)
 """
 
@@ -16,6 +18,8 @@ from app.core.database import SessionLocal
 from app.core.logging import configure_logging
 from app.ingestion.loader import LoadError, dry_run, load_dataset, reset_all, source_counts
 from app.ingestion.reader import DatasetError, read_dataset
+from app.services.business_calendar import seed_demo_calendar
+from app.utils.time import utcnow
 
 
 def main() -> int:
@@ -27,6 +31,9 @@ def main() -> int:
         if name == "load":
             cmd.add_argument("--replace", action="store_true", help="replace data previously loaded from this source")
     sub.add_parser("sources")
+    cal = sub.add_parser("calendar")
+    cal.add_argument("--replace", action="store_true", help="regenerate the demonstration calendar")
+    cal.add_argument("--years", type=int, nargs="+", help="years to generate (default: last, this and next year)")
     reset = sub.add_parser("reset")
     reset.add_argument("--yes", action="store_true", help="confirm wiping every table")
     args = parser.parse_args()
@@ -47,6 +54,14 @@ def main() -> int:
                     print(f"Loaded {report.data_source}: {report.counts}")
             elif args.command == "sources":
                 print(json.dumps(source_counts(db), indent=2))
+            elif args.command == "calendar":
+                year = utcnow().year
+                years = args.years or [year - 1, year, year + 1]
+                added = seed_demo_calendar(db, years, replace=args.replace)
+                if added:
+                    print(f"Added {added} demonstration business-calendar periods for {min(years)}-{max(years)}.")
+                else:
+                    print("Demonstration business calendar already loaded - skipping (use --replace to regenerate).")
             elif args.command == "reset":
                 if not args.yes:
                     print("Refusing to wipe the database without --yes")

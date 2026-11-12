@@ -76,6 +76,12 @@ class Toolkit:
         return {"similar_incidents": self.ctx.data["similar_incidents"],
                 "existing_root_causes": self.ctx.data["existing_root_causes"]}
 
+    def get_business_calendar(self) -> dict:
+        """Month-end close, payroll, regulatory deadlines, peaks and holidays overlapping the incident."""
+        return {"priority": self.ctx.data["incident"]["priority"],
+                "priority_reason": self.ctx.data["incident"].get("priority_reason"),
+                **self.ctx.data.get("business_calendar", {"periods": []})}
+
     # ---- calculations ---------------------------------------------------------------------
 
     def calculate_incident_impact(self) -> dict:
@@ -161,7 +167,7 @@ class Toolkit:
 TOOL_NAMES = [
     "get_incident_details", "get_incident_timeline", "get_application_health", "get_application_dependencies",
     "get_related_changes", "get_recent_deployments", "calculate_incident_impact", "calculate_operational_risk",
-    "get_incident_history",
+    "get_incident_history", "get_business_calendar",
 ]
 
 

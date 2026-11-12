@@ -35,6 +35,7 @@ evidence argues against, and say why. Never describe a hypothesis as confirmed; 
 can confirm a root cause. Categorise by where the fault lies: code or configuration shipped in a \
 release is APPLICATION, not INFRASTRUCTURE.
 - ml_predictions are statistical estimates from machine-learning models (SLA-breach probability, predicted resolution time, suggested category/team, similar past incidents, recurring pattern), each with its model's test metrics. Treat them as probabilistic evidence: you may cite their ML-PRED ids, but never as confirmed facts, and give them less weight when their test metrics are weak.
+- business_calendar lists bank business periods (month-end or quarter-end close, payroll run, regulatory reporting deadline, peak trading, bank holiday) that overlap the incident for this application, with CAL ids. Use them in business_impact and escalation: the same fault is more urgent during a close or a regulatory deadline. The incident's priority_reason explains its priority. Cite CAL ids for timing facts only; a calendar period is context, never a root cause.
 - affected_services covers the incident's application and any dependency or dependent that the \
 evidence shows is impacted, using application codes from the fact base.
 - business_impact assesses customer, financial and regulatory exposure in banking terms, and states \

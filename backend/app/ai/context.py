@@ -1,6 +1,6 @@
 """Build the fact base Claude analyses - everything comes from the database, nothing is invented.
 
-Every item carries an `id` (e.g. TL-12, EV-40, MS-PAY-http_5xx_rate_pct, CHG-2041, INC-1002). Claude
+Every item carries an `id` (e.g. TL-12, EV-40, MS-PAY-http_5xx_rate_pct, CHG-2041, INC-1002, CAL-7). Claude
 must cite these IDs; the guardrails reject citations that are not in `valid_ids`.
 """
 
@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import ChangeRecord, Incident, OperationalEvent
+from app.models import BusinessCalendarPeriod, ChangeRecord, Incident, OperationalEvent
 from app.models.enums import EvidenceType
 from app.repositories.application_repository import ApplicationRepository
 from app.repositories.evidence_repository import EvidenceFilters, EvidenceRepository
@@ -40,6 +40,7 @@ class IncidentContext:
             "evidence_events": len(d["evidence"]["events"]),
             "similar_incidents": len(d["similar_incidents"]),
             "ml_predictions": len(d.get("ml_predictions", [])),
+            "business_calendar": len(d.get("business_calendar", {}).get("periods", [])),
             "citable_ids": len(self.valid_ids),
         }
 
@@ -67,6 +68,7 @@ def build_incident_context(db: Session, incident: Incident, now: datetime | None
         "application": incident.application.code,
         "severity": incident.severity,
         "priority": incident.priority,
+        "priority_reason": incident.priority_reason,
         "category": incident.category,
         "status": incident.status,
         "assigned_team": incident.assigned_team,
@@ -220,6 +222,10 @@ def build_incident_context(db: Session, incident: Incident, now: datetime | None
     ctx.data["ml_predictions"] = ml_evidence(db, incident.id)
     ctx.valid_ids.update(p["id"] for p in ctx.data["ml_predictions"])
 
+    # ---- business calendar (why timing matters for the bank) ------------------------------
+    ctx.data["business_calendar"] = calendar_evidence(db, incident, now)
+    ctx.valid_ids.update(p["id"] for p in ctx.data["business_calendar"]["periods"])
+
     ctx.data["analysis_time"] = _iso(now)
     return ctx
 
@@ -246,3 +252,34 @@ def ml_evidence(db: Session, incident_id: int) -> list[dict]:
             "nature": "statistical estimate from a model trained on past (synthetic) incidents - not an observation",
         })
     return items
+
+
+def calendar_evidence(db: Session, incident: Incident, now: datetime) -> dict:
+    """Business-calendar periods (CAL-<id>) for the affected application that overlap the incident:
+    month-end close, payroll run, regulatory deadline, peak trading, bank holiday."""
+    start, end = incident.started_at, incident.resolved_at or now
+    code = incident.application.code
+    rows = db.scalars(
+        select(BusinessCalendarPeriod)
+        .where(BusinessCalendarPeriod.starts_at <= end, BusinessCalendarPeriod.ends_at > start)
+        .order_by(BusinessCalendarPeriod.starts_at)
+    )
+    periods = []
+    for p in rows:
+        if not p.applies_to(code):
+            continue
+        periods.append({
+            "id": f"CAL-{p.id}", "name": p.name, "type": p.period_type,
+            "starts_at": _iso(p.starts_at), "ends_at": _iso(p.ends_at),
+            "active_at_incident_start": p.starts_at <= start < p.ends_at,
+            "day_of_period": (start.date() - p.starts_at.date()).days + 1 if p.starts_at <= start else None,
+            "raises_priority": p.raises_priority,
+            "applications": p.application_codes or ["ALL"],
+            "description": p.description,
+        })
+    return {
+        "application": code,
+        "note": "business periods when this application is more sensitive; demonstration calendar "
+                "unless data_source says otherwise",
+        "periods": periods,
+    }
